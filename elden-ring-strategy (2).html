@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Elden Ring — The Tarnished's Codex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --gold: #c9a227;
+    --gold-light: #e8c96b;
+    --gold-dark: #8a6e12;
+    --blood: #8b1a1a;
+    --blood-bright: #c0392b;
+    --bg-void: #05040a;
+    --bg-deep: #0a090f;
+    --bg-dark: #100e18;
+    --bg-card: #13111e;
+    --bg-card2: #1a1728;
+    --text-rune: #d4c48a;
+    --text-dim: #6e6457;
+    --border-gold: rgba(201,162,39,0.25);
+    --border-glow: rgba(201,162,39,0.6);
+    --glow-gold: 0 0 20px rgba(201,162,39,0.4), 0 0 60px rgba(201,162,39,0.1);
+    --glow-blood: 0 0 20px rgba(139,26,26,0.6), 0 0 50px rgba(139,26,26,0.2);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background-color:var(--bg-void);
+    color:var(--text-rune);
+    font-family:'Crimson Pro',serif;
+    font-size:17px;
+    line-height:1.7;
+    overflow-x:hidden;
+  }
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-track{background:var(--bg-void);}
+  ::-webkit-scrollbar-thumb{background:var(--gold-dark);border-radius:3px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--gold);}
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:0;opacity:0.4;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1,h2,h3,h4{font-family:'Cinzel',serif;letter-spacing:0.05em;}
+  .font-deco{font-family:'Cinzel Decorative',serif;}
+  .text-gold{color:var(--gold);}
+  .text-blood{color:var(--blood-bright);}
+  .text-rune{color:var(--text-rune);}
+  .text-dim{color:var(--text-dim);}
+
+  /* ── NAVIGATION ── */
+  #navbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(to bottom,rgba(5,4,10,0.98),rgba(5,4,10,0.85));
+    border-bottom:1px solid var(--border-gold);
+    backdrop-filter:blur(12px);
+    transition:all 0.3s ease;
+  }
+  #navbar.scrolled{
+    background:rgba(5,4,10,0.98);
+    box-shadow:0 4px 30px rgba(0,0,0,0.8),0 1px 0 var(--border-gold);
+  }
+  .nav-link{
+    color:var(--text-dim);
+    font-family:'Cinzel',serif;
+    font-size:0.75rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    transition:color 0.3s,text-shadow 0.3s;
+    cursor:pointer;
+    padding:6px 12px;
+    position:relative;
+  }
+  .nav-link::after{
+    content:'';position:absolute;bottom:-2px;left:50%;right:50%;
+    height:1px;background:var(--gold);
+    transition:left 0.3s,right 0.3s;
+  }
+  .nav-link:hover{color:var(--gold);text-shadow:0 0 12px rgba(201,162,39,0.5);}
+  .nav-link:hover::after{left:12px;right:12px;}
+
+  /* ── HERO ── */
+  #hero{
+    min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+    background:radial-gradient(ellipse at 50% 40%, #1a1028 0%, #090612 40%, var(--bg-void) 100%);
+  }
+  #particles-canvas{position:absolute;inset:0;pointer-events:none;}
+  .hero-bg-img{
+    position:absolute;inset:0;
+    background:url('https://upload.wikimedia.org/wikipedia/en/1/1b/Elden_Ring_Box_art.jpg') center/cover no-repeat;
+    opacity:0.07;filter:sepia(1) hue-rotate(260deg) brightness(0.4);
+    z-index:0;
+  }
+  .hero-vignette{
+    position:absolute;inset:0;z-index:1;
+    background:radial-gradient(ellipse at center,transparent 30%,rgba(5,4,10,0.85) 80%);
+  }
+  .hero-content{position:relative;z-index:2;text-align:center;padding:2rem;}
+  .rune-top{
+    font-family:'Cinzel',serif;
+    font-size:0.7rem;letter-spacing:0.4em;
+    color:var(--gold-dark);text-transform:uppercase;
+    margin-bottom:1.5rem;
+    animation:fadeInDown 1s ease 0.2s both;
+  }
+  .hero-title{
+    font-family:'Cinzel Decorative',serif;
+    font-size:clamp(2.8rem,8vw,7rem);
+    font-weight:900;
+    color:var(--gold);
+    text-shadow:0 0 40px rgba(201,162,39,0.5),0 0 100px rgba(201,162,39,0.2),0 4px 30px rgba(0,0,0,0.9);
+    line-height:1.05;
+    animation:heroGlow 3s ease-in-out infinite alternate, fadeInUp 1.2s ease 0.4s both;
+    margin-bottom:0.4rem;
+  }
+  .hero-subtitle{
+    font-family:'Cinzel',serif;
+    font-size:clamp(0.9rem,2.5vw,1.5rem);
+    color:var(--text-rune);
+    letter-spacing:0.25em;
+    text-transform:uppercase;
+    margin-bottom:2rem;
+    animation:fadeInUp 1.2s ease 0.6s both;
+  }
+  .hero-desc{
+    font-family:'Crimson Pro',serif;
+    font-size:clamp(1rem,1.8vw,1.25rem);
+    color:var(--text-dim);
+    max-width:700px;margin:0 auto 3rem;
+    font-style:italic;
+    animation:fadeInUp 1.2s ease 0.8s both;
+  }
+  .hero-divider{
+    width:300px;height:1px;
+    background:linear-gradient(to right,transparent,var(--gold),transparent);
+    margin:2rem auto;
+    animation:expandWidth 1.5s ease 1s both;
+  }
+  .btn-primary{
+    display:inline-flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,var(--gold-dark),var(--gold));
+    color:var(--bg-void);
+    font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:0.15em;
+    text-transform:uppercase;font-weight:700;
+    padding:14px 36px;border:none;cursor:pointer;
+    clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);
+    transition:all 0.3s;
+    box-shadow:0 4px 20px rgba(201,162,39,0.3);
+  }
+  .btn-primary:hover{
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    box-shadow:var(--glow-gold);transform:translateY(-2px);
+  }
+  .btn-secondary{
+    display:inline-flex;align-items:center;gap:10px;
+    background:transparent;
+    color:var(--gold);
+    font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:0.15em;
+    text-transform:uppercase;font-weight:600;
+    padding:13px 36px;
+    border:1px solid var(--gold-dark);cursor:pointer;
+    clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);
+    transition:all 0.3s;
+  }
+  .btn-secondary:hover{
+    background:rgba(201,162,39,0.1);
+    border-color:var(--gold);
+    box-shadow:var(--glow-gold);transform:translateY(-2px);
+  }
+  .hero-stats{
+    display:flex;gap:3rem;justify-content:center;margin-top:4rem;flex-wrap:wrap;
+    animation:fadeInUp 1.2s ease 1.2s both;
+  }
+  .hero-stat{text-align:center;}
+  .hero-stat-num{
+    font-family:'Cinzel Decorative',serif;font-size:2.2rem;
+    color:var(--gold);display:block;
+    text-shadow:0 0 20px rgba(201,162,39,0.4);
+  }
+  .hero-stat-label{font-size:0.75rem;letter-spacing:0.2em;color:var(--text-dim);text-transform:uppercase;font-family:'Cinzel',serif;}
+
+  /* ── SECTION COMMON ── */
+  .section{padding:100px 0;position:relative;z-index:1;}
+  .section-alt{background:linear-gradient(to bottom,var(--bg-void),var(--bg-deep),var(--bg-void));}
+  .section-header{text-align:center;margin-bottom:4rem;}
+  .section-pretitle{
+    font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.4em;
+    color:var(--gold-dark);text-transform:uppercase;margin-bottom:0.8rem;display:block;
+  }
+  .section-title{
+    font-size:clamp(1.8rem,4vw,3rem);
+    color:var(--gold);
+    text-shadow:0 0 30px rgba(201,162,39,0.2);
+    margin-bottom:1rem;
+  }
+  .section-divider{
+    width:180px;height:2px;margin:1rem auto;
+    background:linear-gradient(to right,transparent,var(--gold),transparent);
+    position:relative;
+  }
+  .section-divider::before,.section-divider::after{
+    content:'✦';position:absolute;top:50%;transform:translateY(-50%);
+    color:var(--gold);font-size:0.6rem;
+  }
+  .section-divider::before{left:-15px;}
+  .section-divider::after{right:-15px;}
+  .section-desc{color:var(--text-dim);max-width:600px;margin:0 auto;font-style:italic;font-size:1.05rem;}
+  .container{max-width:1280px;margin:0 auto;padding:0 24px;}
+
+  /* ── CARDS ── */
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border-gold);
+    position:relative;overflow:hidden;
+    transition:transform 0.3s,box-shadow 0.3s,border-color 0.3s;
+  }
+  .card::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg,rgba(201,162,39,0.04),transparent 60%);
+    pointer-events:none;
+  }
+  .card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 30px rgba(201,162,39,0.1);
+    border-color:rgba(201,162,39,0.5);
+  }
+  .card-corner{
+    position:absolute;width:20px;height:20px;
+    border-color:var(--gold);border-style:solid;
+    opacity:0.4;
+    transition:opacity 0.3s;
+  }
+  .card-corner.tl{top:8px;left:8px;border-width:1px 0 0 1px;}
+  .card-corner.tr{top:8px;right:8px;border-width:1px 1px 0 0;}
+  .card-corner.bl{bottom:8px;left:8px;border-width:0 0 1px 1px;}
+  .card-corner.br{bottom:8px;right:8px;border-width:0 1px 1px 0;}
+  .card:hover .card-corner{opacity:0.9;}
+
+  /* ── NEW PLAYER GUIDE ── */
+  .tip-card{
+    background:var(--bg-card);border:1px solid var(--border-gold);
+    padding:1.8rem;position:relative;overflow:hidden;
+    transition:all 0.3s;
+  }
+  .tip-card::after{
+    content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+    background:linear-gradient(to right,transparent,var(--gold),transparent);
+    transform:scaleX(0);transition:transform 0.4s;
+  }
+  .tip-card:hover::after{transform:scaleX(1);}
+  .tip-card:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(0,0,0,0.5),0 0 20px rgba(201,162,39,0.08);}
+  .tip-icon{
+    width:52px;height:52px;border-radius:50%;
+    background:linear-gradient(135deg,rgba(201,162,39,0.15),rgba(201,162,39,0.05));
+    border:1px solid var(--border-gold);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;flex-shrink:0;
+    box-shadow:0 0 20px rgba(201,162,39,0.1);
+  }
+  .tip-number{
+    position:absolute;top:1rem;right:1.2rem;
+    font-family:'Cinzel Decorative',serif;font-size:2.5rem;
+    color:rgba(201,162,39,0.06);font-weight:900;
+    line-height:1;pointer-events:none;
+  }
+
+  /* ── BUILD SECTION ── */
+  .build-tab{
+    background:transparent;border:1px solid var(--border-gold);
+    color:var(--text-dim);
+    font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;
+    padding:10px 20px;cursor:pointer;transition:all 0.3s;
+    clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  }
+  .build-tab.active,.build-tab:hover{
+    background:linear-gradient(135deg,rgba(201,162,39,0.2),rgba(201,162,39,0.05));
+    color:var(--gold);border-color:var(--gold);
+  }
+  .build-panel{display:none;}
+  .build-panel.active{display:block;}
+  .stat-bar-wrap{margin-bottom:0.6rem;}
+  .stat-bar-label{
+    display:flex;justify-content:space-between;
+    font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.1em;
+    color:var(--text-dim);margin-bottom:4px;
+  }
+  .stat-bar-track{
+    height:8px;background:rgba(255,255,255,0.05);
+    border:1px solid rgba(201,162,39,0.1);position:relative;overflow:hidden;
+  }
+  .stat-bar-fill{
+    height:100%;
+    background:linear-gradient(to right,var(--gold-dark),var(--gold));
+    position:relative;
+    transition:width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  .stat-bar-fill::after{
+    content:'';position:absolute;right:0;top:0;bottom:0;width:3px;
+    background:var(--gold-light);box-shadow:0 0 8px var(--gold);
+  }
+  .weapon-tag{
+    display:inline-block;background:rgba(201,162,39,0.1);
+    border:1px solid var(--border-gold);color:var(--gold);
+    font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.1em;
+    padding:3px 10px;margin:3px;text-transform:uppercase;
+  }
+  .strength-badge{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#4ade80;font-size:0.72rem;padding:3px 10px;font-family:'Cinzel',serif;display:inline-block;margin:2px;}
+  .weakness-badge{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#f87171;font-size:0.72rem;padding:3px 10px;font-family:'Cinzel',serif;display:inline-block;margin:2px;}
+
+  /* ── BOSS CARDS ── */
+  .boss-card{
+    background:var(--bg-card);border:1px solid var(--border-gold);
+    overflow:hidden;cursor:pointer;position:relative;
+    transition:all 0.35s;
+  }
+  .boss-card:hover{transform:translateY(-6px);box-shadow:0 25px 60px rgba(0,0,0,0.7),var(--glow-blood);}
+  .boss-card:hover .boss-img-overlay{opacity:0.3;}
+  .boss-img-wrap{position:relative;height:200px;overflow:hidden;}
+  .boss-img-wrap img{width:100%;height:100%;object-fit:cover;filter:sepia(0.4) contrast(1.1);transition:transform 0.5s;}
+  .boss-card:hover .boss-img-wrap img{transform:scale(1.08);}
+  .boss-img-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(to top,var(--bg-card) 0%,rgba(19,17,30,0.7) 50%,transparent 100%);
+    transition:opacity 0.3s;
+  }
+  .boss-difficulty{
+    position:absolute;top:12px;right:12px;
+    font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;
+    padding:3px 10px;text-transform:uppercase;z-index:2;
+  }
+  .diff-hard{background:rgba(139,26,26,0.85);color:#fca5a5;border:1px solid rgba(220,38,38,0.4);}
+  .diff-medium{background:rgba(161,98,7,0.85);color:#fde68a;border:1px solid rgba(234,179,8,0.4);}
+  .diff-easy{background:rgba(21,128,61,0.85);color:#86efac;border:1px solid rgba(34,197,94,0.4);}
+  .diff-extreme{background:rgba(88,28,135,0.85);color:#d8b4fe;border:1px solid rgba(168,85,247,0.4);}
+  .diff-dlc{background:rgba(139,26,80,0.85);color:#f9a8d4;border:1px solid rgba(236,72,153,0.4);}
+  .boss-name{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);margin-bottom:0.3rem;}
+  .boss-location{font-size:0.8rem;color:var(--text-dim);font-style:italic;margin-bottom:0.5rem;}
+  .boss-reward{font-size:0.78rem;color:rgba(201,162,39,0.7);}
+
+  /* ── MODAL ── */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:200;
+    display:none;align-items:center;justify-content:center;padding:20px;
+    backdrop-filter:blur(8px);
+  }
+  .modal-backdrop.open{display:flex;animation:fadeIn 0.3s ease;}
+  .modal-box{
+    background:var(--bg-card);border:1px solid rgba(201,162,39,0.35);
+    max-width:900px;width:100%;max-height:90vh;overflow-y:auto;
+    position:relative;
+    box-shadow:0 40px 100px rgba(0,0,0,0.9),0 0 60px rgba(201,162,39,0.08);
+    animation:modalSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .modal-box::-webkit-scrollbar{width:4px;}
+  .modal-box::-webkit-scrollbar-thumb{background:var(--gold-dark);}
+  .modal-header{
+    background:linear-gradient(135deg,#1a1428,#13111e);
+    border-bottom:1px solid var(--border-gold);padding:2rem;
+    position:sticky;top:0;z-index:10;
+  }
+  .modal-close{
+    position:absolute;top:1.2rem;right:1.5rem;
+    background:none;border:1px solid var(--border-gold);color:var(--gold);
+    width:36px;height:36px;cursor:pointer;
+    font-size:1rem;display:flex;align-items:center;justify-content:center;
+    transition:all 0.3s;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+  }
+  .modal-close:hover{background:rgba(201,162,39,0.2);box-shadow:var(--glow-gold);}
+  .modal-body{padding:2rem;}
+  .phase-block{
+    background:rgba(255,255,255,0.025);
+    border-left:3px solid var(--gold);
+    padding:1.2rem 1.5rem;margin-bottom:1rem;
+  }
+  .phase-title{font-family:'Cinzel',serif;color:var(--gold);font-size:0.9rem;letter-spacing:0.1em;margin-bottom:0.5rem;}
+  .attack-item{
+    background:rgba(139,26,26,0.1);border:1px solid rgba(139,26,26,0.2);
+    padding:0.6rem 1rem;margin-bottom:0.5rem;border-left:3px solid var(--blood);
+  }
+  .attack-name{font-family:'Cinzel',serif;color:#fca5a5;font-size:0.78rem;letter-spacing:0.08em;}
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin:1rem 0;}
+  .info-cell{
+    background:rgba(255,255,255,0.03);border:1px solid var(--border-gold);
+    padding:0.8rem 1rem;text-align:center;
+  }
+  .info-cell-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.15em;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;}
+  .info-cell-value{color:var(--gold);font-size:1rem;font-family:'Cinzel',serif;}
+  .modal-section-title{
+    font-family:'Cinzel',serif;color:var(--text-rune);
+    font-size:0.9rem;letter-spacing:0.15em;text-transform:uppercase;
+    margin:1.5rem 0 0.8rem;padding-bottom:0.4rem;
+    border-bottom:1px solid var(--border-gold);
+  }
+
+  /* ── REGIONS ── */
+  .region-card{
+    position:relative;overflow:hidden;cursor:pointer;
+    background:var(--bg-card);border:1px solid var(--border-gold);
+    transition:all 0.35s;
+  }
+  .region-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 25px rgba(201,162,39,0.1);}
+  .region-img{height:180px;width:100%;object-fit:cover;filter:sepia(0.5) contrast(1.1) brightness(0.7);transition:all 0.5s;}
+  .region-card:hover .region-img{transform:scale(1.05);filter:sepia(0.3) contrast(1.1) brightness(0.8);}
+  .region-overlay{
+    position:absolute;top:0;left:0;right:0;height:180px;
+    background:linear-gradient(to top,var(--bg-card),transparent 60%);
+  }
+  .region-level{
+    position:absolute;top:12px;left:12px;
+    font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;
+    background:rgba(5,4,10,0.85);border:1px solid var(--border-gold);
+    color:var(--gold);padding:3px 10px;text-transform:uppercase;
+  }
+  .region-tag{
+    display:inline-block;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.08em;
+    background:rgba(201,162,39,0.08);border:1px solid var(--border-gold);
+    color:var(--text-dim);padding:2px 8px;margin:2px;text-transform:uppercase;
+  }
+
+  /* ── QUESTLINES ── */
+  .quest-step{
+    display:flex;gap:1rem;margin-bottom:1rem;position:relative;
+  }
+  .quest-step::before{
+    content:'';position:absolute;left:18px;top:40px;bottom:-10px;width:1px;
+    background:linear-gradient(to bottom,var(--border-gold),transparent);
+  }
+  .quest-step:last-child::before{display:none;}
+  .quest-step-num{
+    width:36px;height:36px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,rgba(201,162,39,0.2),rgba(201,162,39,0.05));
+    border:1px solid var(--border-gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);
+    box-shadow:0 0 12px rgba(201,162,39,0.15);
+  }
+  .quest-content{flex:1;background:rgba(255,255,255,0.025);border:1px solid var(--border-gold);padding:1rem 1.2rem;}
+  .quest-step-title{font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.08em;margin-bottom:0.3rem;}
+  .quest-tab{
+    background:transparent;border:1px solid var(--border-gold);
+    color:var(--text-dim);font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;
+    padding:8px 18px;cursor:pointer;transition:all 0.3s;margin-bottom:-1px;
+  }
+  .quest-tab.active{background:rgba(201,162,39,0.12);color:var(--gold);border-color:var(--gold);border-bottom-color:var(--bg-card);}
+  .quest-panel{display:none;background:var(--bg-card);border:1px solid var(--border-gold);padding:2rem;}
+  .quest-panel.active{display:block;}
+  .npc-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(201,162,39,0.08);border:1px solid var(--border-gold);
+    color:var(--gold);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;
+    padding:4px 12px;margin-bottom:1rem;
+  }
+
+  /* ── WEAPONS TABLE ── */
+  .weapons-table{width:100%;border-collapse:collapse;font-size:0.9rem;}
+  .weapons-table th{
+    font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;
+    color:var(--gold);background:rgba(201,162,39,0.08);
+    padding:10px 14px;border:1px solid var(--border-gold);text-align:left;
+  }
+  .weapons-table td{
+    padding:10px 14px;border:1px solid rgba(201,162,39,0.1);
+    color:var(--text-rune);vertical-align:top;
+  }
+  .weapons-table tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
+  .weapons-table tr:hover td{background:rgba(201,162,39,0.04);}
+  .tier-s{color:#e8c96b;font-family:'Cinzel',serif;font-weight:700;}
+  .tier-a{color:#86efac;font-family:'Cinzel',serif;font-weight:700;}
+  .tier-b{color:#93c5fd;font-family:'Cinzel',serif;font-weight:700;}
+  .tier-c{color:#d1d5db;font-family:'Cinzel',serif;font-weight:700;}
+
+  /* ── COMMENTS ── */
+  .comment-card{
+    background:var(--bg-card);border:1px solid var(--border-gold);
+    padding:1.5rem;position:relative;overflow:hidden;
+    transition:all 0.3s;
+  }
+  .comment-card:hover{border-color:rgba(201,162,39,0.4);transform:translateY(-2px);}
+  .comment-avatar{
+    width:46px;height:46px;border-radius:50%;
+    border:2px solid var(--border-gold);object-fit:cover;
+    filter:sepia(0.3);
+  }
+  .comment-author{font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.05em;}
+  .comment-date{font-size:0.72rem;color:var(--text-dim);}
+  .comment-text{color:var(--text-rune);font-size:0.95rem;line-height:1.6;margin-top:0.8rem;}
+  .upvote-btn{
+    background:none;border:1px solid var(--border-gold);color:var(--text-dim);
+    font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.1em;
+    padding:4px 12px;cursor:pointer;transition:all 0.3s;text-transform:uppercase;
+  }
+  .upvote-btn:hover{background:rgba(201,162,39,0.1);color:var(--gold);}
+
+  /* ── SEARCH ── */
+  .search-wrap{position:relative;max-width:500px;margin:0 auto 4rem;}
+  .search-input{
+    width:100%;background:rgba(255,255,255,0.04);
+    border:1px solid var(--border-gold);
+    color:var(--text-rune);font-family:'Crimson Pro',serif;font-size:1rem;
+    padding:14px 20px 14px 50px;outline:none;
+    transition:all 0.3s;
+  }
+  .search-input::placeholder{color:var(--text-dim);}
+  .search-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.06);box-shadow:0 0 20px rgba(201,162,39,0.15);}
+  .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none;}
+  #search-results{
+    background:var(--bg-card);border:1px solid var(--border-gold);
+    max-height:300px;overflow-y:auto;margin-top:4px;display:none;
+  }
+  .search-result-item{
+    padding:10px 16px;border-bottom:1px solid var(--border-gold);
+    cursor:pointer;transition:background 0.2s;
+  }
+  .search-result-item:hover{background:rgba(201,162,39,0.08);}
+  .search-result-item:last-child{border-bottom:none;}
+  .search-result-title{font-family:'Cinzel',serif;color:var(--gold);font-size:0.82rem;}
+  .search-result-section{font-size:0.72rem;color:var(--text-dim);}
+
+  /* ── BACK TO TOP ── */
+  #back-top{
+    position:fixed;bottom:2rem;right:2rem;z-index:50;
+    background:linear-gradient(135deg,rgba(201,162,39,0.2),rgba(201,162,39,0.05));
+    border:1px solid var(--border-gold);color:var(--gold);
+    width:48px;height:48px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+    transition:all 0.3s;
+    opacity:0;pointer-events:none;
+    box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  }
+  #back-top.visible{opacity:1;pointer-events:auto;}
+  #back-top:hover{background:rgba(201,162,39,0.3);box-shadow:var(--glow-gold);}
+
+  /* ── FOOTER ── */
+  footer{
+    background:var(--bg-void);
+    border-top:1px solid var(--border-gold);
+    padding:4rem 0 2rem;
+    position:relative;z-index:1;
+  }
+  .footer-rune{
+    font-family:'Cinzel Decorative',serif;font-size:2rem;
+    color:rgba(201,162,39,0.15);text-align:center;
+    letter-spacing:0.2em;margin-bottom:1rem;
+  }
+  .footer-link{color:var(--text-dim);font-size:0.8rem;letter-spacing:0.1em;font-family:'Cinzel',serif;transition:color 0.3s;cursor:pointer;}
+  .footer-link:hover{color:var(--gold);}
+
+  /* ── ANIMATIONS ── */
+  @keyframes heroGlow{
+    from{text-shadow:0 0 30px rgba(201,162,39,0.4),0 0 80px rgba(201,162,39,0.1),0 4px 20px rgba(0,0,0,0.9);}
+    to{text-shadow:0 0 50px rgba(201,162,39,0.7),0 0 120px rgba(201,162,39,0.25),0 0 200px rgba(201,162,39,0.08),0 4px 20px rgba(0,0,0,0.9);}
+  }
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes expandWidth{from{width:0;}to{width:300px;}}
+  @keyframes modalSlide{from{opacity:0;transform:translateY(40px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+  @keyframes pulse-gold{0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,0.4);}50%{box-shadow:0 0 0 8px rgba(201,162,39,0);}}
+  @keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  .animate-float{animation:float 6s ease-in-out infinite;}
+  .animate-pulse-gold{animation:pulse-gold 2s infinite;}
+
+  /* ── SCROLL REVEAL ── */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;}
+  .reveal.visible{opacity:1;transform:translateY(0);}
+  .reveal-delay-1{transition-delay:0.1s;}
+  .reveal-delay-2{transition-delay:0.2s;}
+  .reveal-delay-3{transition-delay:0.3s;}
+  .reveal-delay-4{transition-delay:0.4s;}
+
+  /* ── MOBILE ── */
+  @media(max-width:768px){
+    .section{padding:60px 0;}
+    .hero-stats{gap:1.5rem;}
+    .modal-box{max-height:95vh;}
+    .modal-body,.modal-header{padding:1.2rem;}
+    .info-grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+  /* ── LORE SCROLL BANNER ── */
+  .lore-band{
+    background:linear-gradient(to right,var(--bg-void),rgba(201,162,39,0.05),var(--bg-void));
+    border-top:1px solid var(--border-gold);border-bottom:1px solid var(--border-gold);
+    overflow:hidden;padding:12px 0;position:relative;z-index:1;
+  }
+  .lore-ticker{
+    display:flex;gap:80px;white-space:nowrap;
+    animation:ticker 40s linear infinite;
+  }
+  .lore-ticker-item{
+    font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.25em;
+    color:var(--gold-dark);text-transform:uppercase;flex-shrink:0;
+  }
+  @keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  /* gold hr separator */
+  .gold-sep{border:none;border-top:1px solid var(--border-gold);margin:2rem 0;}
+
+  /* progress track on loading bars */
+  .load-bar-outer{height:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(201,162,39,0.1);margin:4px 0 10px;}
+  .load-bar-inner{height:100%;background:linear-gradient(to right,var(--blood),var(--blood-bright));}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+<nav id="navbar">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span style="font-family:'Cinzel Decorative',serif;font-size:1.3rem;color:var(--gold);text-shadow:0 0 15px rgba(201,162,39,0.4);">⚜</span>
+        <span style="font-family:'Cinzel Decorative',serif;font-size:0.9rem;color:var(--gold);letter-spacing:0.1em;">Tarnished's Codex</span>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">
+        <span class="nav-link" onclick="scrollTo('guide')">New Player</span>
+        <span class="nav-link" onclick="scrollTo('builds')">Builds</span>
+        <span class="nav-link" onclick="scrollTo('bosses')">Bosses</span>
+        <span class="nav-link" onclick="scrollTo('regions')">Regions</span>
+        <span class="nav-link" onclick="scrollTo('quests')">Quests</span>
+        <span class="nav-link" onclick="scrollTo('weapons')">Weapons</span>
+        <span class="nav-link" onclick="scrollTo('community')">Community</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="search-wrap" style="margin:0;max-width:200px;">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="nav-search" placeholder="Search..." style="padding:8px 12px 8px 38px;font-size:0.82rem;"/>
+          <div id="search-results"></div>
+        </div>
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);display:block;" class="animate-pulse-gold"></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<section id="hero">
+  <div class="hero-bg-img"></div>
+  <div class="hero-vignette"></div>
+  <canvas id="particles-canvas"></canvas>
+  <div class="hero-content">
+    <p class="rune-top">✦ The Complete Strategy Compendium ✦ Shadow of the Erdtree Edition ✦</p>
+    <h1 class="hero-title">ELDEN RING</h1>
+    <p class="hero-subtitle">The Tarnished's Codex — Master the Lands Between</p>
+    <div class="hero-divider"></div>
+    <p class="hero-desc">"Rise, Tarnished. Thou art maidenless, yet greatness awaits. Let the grace of the Elden Ring illuminate thy path through the Lands Between — from the verdant fields of Limgrave to the shadowed realm beyond the veil."</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeInUp 1.2s ease 1s both;">
+      <button class="btn-primary" onclick="scrollTo('guide')">⚔ Begin the Journey</button>
+      <button class="btn-secondary" onclick="scrollTo('bosses')">☠ Boss Strategies</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-num">165+</span><span class="hero-stat-label">Bosses</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">100+</span><span class="hero-stat-label">Hours</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-label">Build Types</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">8</span><span class="hero-stat-label">Major Regions</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">DLC</span><span class="hero-stat-label">Included</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ LORE TICKER ═══════════════════════ -->
+<div class="lore-band">
+  <div class="lore-ticker" id="ticker">
+    <span class="lore-ticker-item">✦ Seek the Elden Ring</span>
+    <span class="lore-ticker-item">✦ Godrick the Grafted — First Shardbearer</span>
+    <span class="lore-ticker-item">✦ Malenia, Blade of Miquella — Undefeated</span>
+    <span class="lore-ticker-item">✦ The Erdtree burns eternal</span>
+    <span class="lore-ticker-item">✦ Shadow of the Erdtree — Journey to the Realm of Shadow</span>
+    <span class="lore-ticker-item">✦ Radahn — Consort of the Moon</span>
+    <span class="lore-ticker-item">✦ Thou art Maidenless, Tarnished</span>
+    <span class="lore-ticker-item">✦ Let the golden order prevail</span>
+    <span class="lore-ticker-item">✦ Miquella's Needle — Release from the Frenzied Flame</span>
+    <span class="lore-ticker-item">✦ Seek the Elden Ring</span>
+    <span class="lore-ticker-item">✦ Godrick the Grafted — First Shardbearer</span>
+    <span class="lore-ticker-item">✦ Malenia, Blade of Miquella — Undefeated</span>
+    <span class="lore-ticker-item">✦ The Erdtree burns eternal</span>
+    <span class="lore-ticker-item">✦ Shadow of the Erdtree — Journey to the Realm of Shadow</span>
+    <span class="lore-ticker-item">✦ Radahn — Consort of the Moon</span>
+    <span class="lore-ticker-item">✦ Thou art Maidenless, Tarnished</span>
+    <span class="lore-ticker-item">✦ Let the golden order prevail</span>
+    <span class="lore-ticker-item">✦ Miquella's Needle — Release from the Frenzied Flame</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════ NEW PLAYER GUIDE ═══════════════════════ -->
+<section class="section" id="guide">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-pretitle">✦ Start Here ✦</span>
+      <h2 class="section-title">New Tarnished's Guide</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Essential wisdom for those who have just arrived in the Lands Between. These tips will save you countless deaths and hours of frustration — including guidance for the Shadow of the Erdtree DLC.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;">
+
+      <!-- TIP 1 -->
+      <div class="tip-card reveal">
+        <div class="tip-number">01</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:1rem;">
+          <div class="tip-icon">⚔</div>
+          <div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;">Choose Your Starting Class Wisely</h3>
+            <p style="font-size:0.72rem;color:var(--text-dim);font-style:italic;">Foundation of your Tarnished</p>
+          </div>
+        </div>
+        <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">Your starting class determines your base stats but NOT your final build — any class can wield any weapon. <strong style="color:var(--gold);">Vagabond</strong> is the safest choice for beginners (high vigor, decent armor). <strong style="color:var(--gold);">Hero</strong> suits pure strength. <strong style="color:var(--gold);">Prophet</strong> for faith/healing. <strong style="color:var(--gold);">Astrologer</strong> for spellcasters who want offense from a distance.</p>
+        <div style="background:rgba(201,162,39,0.05);border-left:2px solid var(--gold);padding:0.6rem 0.8rem;">
+          <p style="font-size:0.82rem;color:var(--gold);">💡 Pro Tip: The Wretch class starts at level 1 with balanced stats — best for veteran players who know exactly what build they want.</p>
+        </div>
+      </div>
+
+      <!-- TIP 2 -->
+      <div class="tip-card reveal reveal-delay-1">
+        <div class="tip-number">02</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:1rem;">
+          <div class="tip-icon">🗺</div>
+          <div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;">Explore Before Progressing</h3>
+            <p style="font-size:0.72rem;color:var(--text-dim);font-style:italic;">The open world is your greatest teacher</p>
+          </div>
+        </div>
+        <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">Elden Ring rewards curiosity. If a boss feels impossible, you're likely underleveled or under-geared. Explore Limgrave thoroughly — there are <strong style="color:var(--gold);">hidden caves</strong>, <strong style="color:var(--gold);">underground catacombs</strong>, and entire dungeons most players miss. Weeping Peninsula (south) has excellent early gear including the <strong style="color:var(--gold);">Bloodhound's Fang</strong> curved greatsword.</p>
+        <div style="background:rgba(201,162,39,0.05);border-left:2px solid var(--gold);padding:0.6rem 0.8rem;">
+          <p style="font-size:0.82rem;color:var(--gold);">💡 Collect map fragments from stone pillars in each area — they'll reveal the layout of each region.</p>
+        </div>
+      </div>
+
+      <!-- TIP 3 -->
+      <div class="tip-card reveal reveal-delay-2">
+        <div class="tip-number">03</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:1rem;">
+          <div class="tip-icon">📊</div>
+          <div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;">Understanding Vigor & Leveling Priority</h3>
+            <p style="font-size:0.72rem;color:var(--text-dim);font-style:italic;">The most important stat for survival</p>
+          </div>
+        </div>
+        <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">Vigor (HP) is king in early-game. Aim for <strong style="color:var(--gold);">at least 40 Vigor</strong> before endgame, and 60 for NG+ or DLC. Endurance controls stamina and equip load — keep your load below 70% (medium roll) for optimal dodge iframes. Level your main damage stat to soft caps: 40 for most stats, 60 for Arcane and some Faith builds.</p>
+        <div style="background:rgba(139,26,26,0.1);border-left:2px solid var(--blood);padding:0.6rem 0.8rem;">
+          <p style="font-size:0.82rem;color:#fca5a5;">⚠ Warning: Neglecting Vigor is the #1 beginner mistake. Even veteran players struggle in the DLC without 55+ Vigor.</p>
+        </div>
+        <div style="margin-top:0.8rem;">
+          <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Vigor Priority</span><span>High</span></div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:90%"></div></div></div>
+          <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Endurance Priority</span><span>Medium</span></div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:55%"></div></div></div>
+          <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Damage Stat Priority</span><span>High</span></div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:80%"></div></div></div>
+        </div>
+      </div>
+
+      <!-- TIP 4 -->
+      <div class="tip-card reveal">
+        <div class="tip-number">04</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:1rem;">
+          <div class="tip-icon">👥</div>
+          <div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;">Spirit Ashes & Summons</h3>
+            <p style="font-size:0.72rem;color:var(--text-dim);font-style:italic;">Your phantom army awaits</p>
+          </div>
+        </div>
+        <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">Spirit Ashes are one of Elden Ring's most powerful mechanics. The <strong style="color:var(--gold);">Mimic Tear</strong> (obtained in Nokron) creates a copy of your character — arguably the strongest summon in the game. <strong style="color:var(--gold);">Black Knife Tiche</strong> excels against slow bosses. <strong style="color:var(--gold);">Lhutel the Headless</strong> provides excellent distraction. Upgrade your ashes using Grave Glovewort and Ghost Glovewort at Roderika's shop in Roundtable Hold.</p>
+        <div style="background:rgba(201,162,39,0.05);border-left:2px solid var(--gold);padding:0.6rem 0.8rem;">
+          <p style="font-size:0.82rem;color:var(--gold);">💡 For DLC bosses, summon signs near fog gates allow you to call NPC phantoms for free.</p>
+        </div>
+      </div>
+
+      <!-- TIP 5 -->
+      <div class="tip-card reveal reveal-delay-1">
+        <div class="tip-number">05</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:1rem;">
+          <div class="tip-icon">⚗</div>
+          <div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;">Crafting, Flasks & Consumables</h3>
+            <p style="font-size:0.72rem;color:var(--text-dim);font-style:italic;">Alchemy of survival</p>
+          </div>
+        </div>
+        <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">Allocate Flask of Wondrous Physick tears wisely — the <strong style="color:var(--gold);">Opaline Bubbletear</strong> (shield burst on low HP) and <strong style="color:var(--gold);">Stonebarb Cracked Tear</strong> (posture damage boost) are excellent all-purpose choices. Craft Neutralizing Boluses for poison, Stanching Boluses for bleed, and Stimulating Boluses for energy. Use Golden Seeds and Sacred Tears to upgrade your flask charges and potency.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:0.8rem;">
+          <span class="weapon-tag">Opaline Bubbletear</span>
+          <span class="weapon-tag">Stonebarb Cracked Tear</span>
+          <span class="weapon-tag">Crimsonburst Crystal Tear</span>
+        </div>
+      </div>
+
+      <!-- TIP 6 -->
+      <div class="tip-card reveal reveal-delay-2">
+        <div class="tip-number">06</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:1rem;">
+          <div class="tip-icon">🏰</div>
+          <div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;">Roundtable Hold & Multiplayer</h3>
+            <p style="font-size:0.72rem;color:var(--text-dim);font-style:italic;">The hub of the Tarnished</p>
+          </div>
+        </div>
+        <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">Roundtable Hold unlocks after reaching the First Step site of grace. Here you'll find <strong style="color:var(--gold);">Smithing Master Hewg</strong> (weapon upgrades), <strong style="color:var(--gold);">Roderika</strong> (spirit ash upgrades), <strong style="color:var(--gold);">Enia</strong> (trades Great Runes and Remembrances), and various merchants. For multiplayer, use <strong style="color:var(--gold);">Furlcalling Finger Remedy</strong> to see summon signs, or the <strong style="color:var(--gold);">Tarnished's Furled Finger</strong> to leave your own sign.</p>
+        <div style="background:rgba(201,162,39,0.05);border-left:2px solid var(--gold);padding:0.6rem 0.8rem;">
+          <p style="font-size:0.82rem;color:var(--gold);">💡 Use passwords in multiplayer settings to summon friends directly without matching at random.</p>
+        </div>
+      </div>
+
+      <!-- TIP 7 -->
+      <div class="tip-card reveal">
+        <div class="tip-number">07</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:1rem;">
+          <div class="tip-icon">🌿</div>
+          <div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;">Shadow of the Erdtree — DLC Entry</h3>
+            <p style="font-size:0.72rem;color:var(--text-dim);font-style:italic;">The Realm of Shadow awaits</p>
+          </div>
+        </div>
+        <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">To access the DLC, you must first defeat <strong style="color:var(--gold);">Starscourge Radahn</strong> in Caelid AND interact with <strong style="color:var(--gold);">Mohg, Lord of Blood</strong>'s cocoon in Mohgwyn Palace. The DLC introduces <strong style="color:var(--gold);">Scadutree Fragments</strong> (shadow power upgrades) and <strong style="color:var(--gold);">Revered Spirit Ashes</strong> — both are <em>essential</em> to collect. The DLC is significantly harder than the base game; recommended entry level: <strong style="color:var(--gold);">150+</strong> with 60 Vigor.</p>
+        <div style="background:rgba(139,26,26,0.1);border-left:2px solid var(--blood);padding:0.6rem 0.8rem;">
+          <p style="font-size:0.82rem;color:#fca5a5;">⚠ Scadutree Blessings are mandatory for DLC — without them, even regular enemies will two-shot you regardless of your level.</p>
+        </div>
+      </div>
+
+      <!-- TIP 8 -->
+      <div class="tip-card reveal reveal-delay-1">
+        <div class="tip-number">08</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:1rem;">
+          <div class="tip-icon">🎯</div>
+          <div>
+            <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;margin-bottom:4px;">Status Effects & Weaknesses</h3>
+            <p style="font-size:0.72rem;color:var(--text-dim);font-style:italic;">Exploit enemy vulnerabilities</p>
+          </div>
+        </div>
+        <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">Most bosses are susceptible to at least one status effect. <strong style="color:var(--gold);">Bleed (Hemorrhage)</strong> deals massive percentage-based damage — highly effective on humanoid bosses. <strong style="color:var(--gold);">Frost</strong> reduces absorption and staggers. <strong style="color:var(--gold);">Scarlet Rot</strong> devastates large bosses. <strong style="color:var(--gold);">Gravity magic</strong> works on flying enemies. Check the Elden Ring wiki for specific weaknesses — the right tool makes any boss far more manageable.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:0.8rem;">
+          <span style="background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);color:#fca5a5;font-size:0.7rem;padding:2px 10px;font-family:'Cinzel',serif;">Hemorrhage</span>
+          <span style="background:rgba(147,197,253,0.15);border:1px solid rgba(147,197,253,0.3);color:#93c5fd;font-size:0.7rem;padding:2px 10px;font-family:'Cinzel',serif;">Frostbite</span>
+          <span style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:#4ade80;font-size:0.7rem;padding:2px 10px;font-family:'Cinzel',serif;">Scarlet Rot</span>
+          <span style="background:rgba(250,204,21,0.15);border:1px solid rgba(250,204,21,0.3);color:#fde68a;font-size:0.7rem;padding:2px 10px;font-family:'Cinzel',serif;">Madness</span>
+          <span style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:#c4b5fd;font-size:0.7rem;padding:2px 10px;font-family:'Cinzel',serif;">Sleep</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ BUILDS ═══════════════════════ -->
+<section class="section section-alt" id="builds">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-pretitle">✦ Character Creation ✦</span>
+      <h2 class="section-title">Build Recommendations</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Comprehensive build guides from early game through endgame and DLC. Each build includes stat targets, weapon choices, and playstyle notes.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:2rem;" class="reveal">
+      <button class="build-tab active" onclick="switchBuild('str',this)">⚔ Strength</button>
+      <button class="build-tab" onclick="switchBuild('dex',this)">🗡 Dexterity</button>
+      <button class="build-tab" onclick="switchBuild('int',this)">✨ Intelligence</button>
+      <button class="build-tab" onclick="switchBuild('fth',this)">🙏 Faith</button>
+      <button class="build-tab" onclick="switchBuild('arc',this)">🩸 Arcane</button>
+    </div>
+
+    <!-- Strength Build -->
+    <div class="build-panel active reveal" id="build-str">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;" class="md-grid">
+        <div>
+          <div class="card" style="padding:2rem;">
+            <div class="card-corner tl"></div><div class="card-corner tr"></div><div class="card-corner bl"></div><div class="card-corner br"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+              <span style="font-size:2rem;">🪨</span>
+              <div>
+                <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1.3rem;">Colossal Greatsword Overlord</h3>
+                <p style="font-size:0.8rem;color:var(--text-dim);">Recommended Class: Hero / Vagabond</p>
+              </div>
+            </div>
+            <p style="color:var(--text-rune);font-size:0.95rem;margin-bottom:1.5rem;line-height:1.7;">The definitive bruiser build. Wields enormous weapons that stagger most enemies with a single strike. Slow but devastating — each swing feels earned. Exceptionally strong against bosses susceptible to posture break. The introduction of Stormcaller and Savage Lion's Claw ash of war makes this build terrifying in the DLC.</p>
+            <h4 style="font-family:'Cinzel',serif;color:var(--text-rune);font-size:0.8rem;letter-spacing:0.15em;margin-bottom:1rem;text-transform:uppercase;">Stat Distribution (Endgame)</h4>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Vigor</span><span>60</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="80"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Endurance</span><span>32</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="43"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Strength</span><span>80</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="100"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Dexterity</span><span>16</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="21"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Intelligence</span><span>9</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="12"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Faith</span><span>16</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="21"></div></div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Core Weapons</h4>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <span class="weapon-tag">Greatsword (+25)</span>
+              <span class="weapon-tag">Giant-Crusher</span>
+              <span class="weapon-tag">Ruins Greatsword</span>
+              <span class="weapon-tag">Starscourge Greatsword</span>
+              <span class="weapon-tag">Bloodfiend's Arm (DLC)</span>
+            </div>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Recommended Armor</h4>
+            <p style="font-size:0.9rem;color:var(--text-rune);">Bull-Goat Set (max poise), Veteran's Armor, or mix-match for ~51 poise threshold. Use Radahn's Lion armor for mid poise with style.</p>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Talismans</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="weapon-tag">Shard of Alexander</span>
+              <span class="weapon-tag">Great Jar's Arsenal</span>
+              <span class="weapon-tag">Starscourge Heirloom</span>
+              <span class="weapon-tag">Erdtree's Favor +2</span>
+            </div>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Strengths & Weaknesses</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <span class="strength-badge">✓ Massive poise break</span>
+              <span class="strength-badge">✓ Two-hand bonus (+50% STR)</span>
+              <span class="strength-badge">✓ Very tanky</span>
+              <span class="weakness-badge">✗ Slow attack speed</span>
+              <span class="weakness-badge">✗ Stamina hungry</span>
+              <span class="weakness-badge">✗ Bad against small enemies</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dexterity Build -->
+    <div class="build-panel reveal" id="build-dex">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+        <div>
+          <div class="card" style="padding:2rem;">
+            <div class="card-corner tl"></div><div class="card-corner tr"></div><div class="card-corner bl"></div><div class="card-corner br"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+              <span style="font-size:2rem;">🗡</span>
+              <div>
+                <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1.3rem;">Bleed Dex — Flowing Blade</h3>
+                <p style="font-size:0.8rem;color:var(--text-dim);">Recommended Class: Samurai / Bandit</p>
+              </div>
+            </div>
+            <p style="color:var(--text-rune);font-size:0.95rem;margin-bottom:1.5rem;line-height:1.7;">The fastest, most stylish build in Elden Ring. Dexterity weapons have the best animations and benefit massively from bleed infusion. The Rivers of Blood katana remains one of the strongest weapons in the game even after patches. Exceptionally mobile — use jumping attacks to deal massive poise damage.</p>
+            <h4 style="font-family:'Cinzel',serif;color:var(--text-rune);font-size:0.8rem;letter-spacing:0.15em;margin-bottom:1rem;text-transform:uppercase;">Stat Distribution (Endgame)</h4>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Vigor</span><span>60</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="80"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Endurance</span><span>28</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="37"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Strength</span><span>18</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="24"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Dexterity</span><span>80</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="100"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Arcane</span><span>45</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="60"></div></div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Core Weapons</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="weapon-tag">Rivers of Blood</span>
+              <span class="weapon-tag">Moonveil Katana</span>
+              <span class="weapon-tag">Nagakiba (Bleed)</span>
+              <span class="weapon-tag">Hand of Malenia</span>
+              <span class="weapon-tag">Milady (DLC)</span>
+            </div>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Key Strategy</h4>
+            <p style="font-size:0.9rem;color:var(--text-rune);">Dual wield two bleed katanas for maximum hemorrhage buildup. Bloodflame Blade Incantation adds bleed to any weapon. White Mask helm triggers when enemies bleed nearby. Use L1 (dual wield) spam for rapid status buildup.</p>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Talismans</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="weapon-tag">Lord of Blood's Exultation</span>
+              <span class="weapon-tag">Shard of Alexander</span>
+              <span class="weapon-tag">Millicent's Prosthesis</span>
+              <span class="weapon-tag">Rotten Winged Sword</span>
+            </div>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Strengths & Weaknesses</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <span class="strength-badge">✓ Extremely fast attacks</span>
+              <span class="strength-badge">✓ Massive bleed damage</span>
+              <span class="strength-badge">✓ High DPS ceiling</span>
+              <span class="weakness-badge">✗ Bleed-immune bosses counter it</span>
+              <span class="weakness-badge">✗ Lower poise</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intelligence Build -->
+    <div class="build-panel reveal" id="build-int">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+        <div>
+          <div class="card" style="padding:2rem;">
+            <div class="card-corner tl"></div><div class="card-corner tr"></div><div class="card-corner bl"></div><div class="card-corner br"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+              <span style="font-size:2rem;">🔮</span>
+              <div>
+                <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1.3rem;">Carian Sorcerer — Arcane Scholar</h3>
+                <p style="font-size:0.8rem;color:var(--text-dim);">Recommended Class: Astrologer / Prisoner</p>
+              </div>
+            </div>
+            <p style="color:var(--text-rune);font-size:0.95rem;margin-bottom:1.5rem;line-height:1.7;">The glass cannon. Intelligence builds deal astronomical damage when played correctly, but require significant knowledge of spell timings. Comet Azur with Cerulean Hidden Tear is legendary for decimating bosses in seconds. Lusat's Glintstone Staff provides the highest sorcery scaling in the game.</p>
+            <h4 style="font-family:'Cinzel',serif;color:var(--text-rune);font-size:0.8rem;letter-spacing:0.15em;margin-bottom:1rem;text-transform:uppercase;">Stat Distribution (Endgame)</h4>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Vigor</span><span>55</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="73"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Mind</span><span>40</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="53"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Dexterity</span><span>16</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="21"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Intelligence</span><span>80</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="100"></div></div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Key Spells</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="weapon-tag">Comet Azur</span>
+              <span class="weapon-tag">Stars of Ruin</span>
+              <span class="weapon-tag">Loretta's Greatbow</span>
+              <span class="weapon-tag">Founding Rain of Stars</span>
+              <span class="weapon-tag">Carian Slicer</span>
+              <span class="weapon-tag">Glintblade Phalanx</span>
+            </div>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Core Equipment</h4>
+            <p style="font-size:0.9rem;color:var(--text-rune);">Lusat's Glintstone Staff (main), Azur's Glintstone Staff (Comet Azur), Carian Regal Scepter. Wear Azur's Glintcoat for FP cost reduction on glintstone sorceries.</p>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Strengths & Weaknesses</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <span class="strength-badge">✓ Highest burst damage</span>
+              <span class="strength-badge">✓ Incredible range</span>
+              <span class="strength-badge">✓ Versatile toolkit</span>
+              <span class="weakness-badge">✗ FP management critical</span>
+              <span class="weakness-badge">✗ Poor in tight spaces</span>
+              <span class="weakness-badge">✗ Weak to magic-immune enemies</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Faith Build -->
+    <div class="build-panel reveal" id="build-fth">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+        <div>
+          <div class="card" style="padding:2rem;">
+            <div class="card-corner tl"></div><div class="card-corner tr"></div><div class="card-corner bl"></div><div class="card-corner br"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+              <span style="font-size:2rem;">⚡</span>
+              <div>
+                <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1.3rem;">Dragon Cult Incantation Build</h3>
+                <p style="font-size:0.8rem;color:var(--text-dim);">Recommended Class: Prophet / Confessor</p>
+              </div>
+            </div>
+            <p style="color:var(--text-rune);font-size:0.95rem;margin-bottom:1.5rem;line-height:1.7;">Faith builds are wildly versatile — healing, offensive lightning, fire, holy, and dragon communion spells. The dual seal casting method allows combining Lightning and Fire incantations for maximum versatility. Crucible Knight incantations add physical attacks that synergize beautifully with melee combat.</p>
+            <h4 style="font-family:'Cinzel',serif;color:var(--text-rune);font-size:0.8rem;letter-spacing:0.15em;margin-bottom:1rem;text-transform:uppercase;">Stat Distribution (Endgame)</h4>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Vigor</span><span>60</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="80"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Mind</span><span>35</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="46"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Strength</span><span>30</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="40"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Faith</span><span>80</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="100"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Arcane</span><span>25</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="33"></div></div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Key Incantations</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="weapon-tag">Lightning Spear</span>
+              <span class="weapon-tag">Erdtree Heal</span>
+              <span class="weapon-tag">Giant's Flame Take Thee</span>
+              <span class="weapon-tag">Flame of the Fell God</span>
+              <span class="weapon-tag">Pest Threads</span>
+              <span class="weapon-tag">Dragon Communion Seal</span>
+            </div>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Strengths & Weaknesses</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <span class="strength-badge">✓ Best self-healing</span>
+              <span class="strength-badge">✓ Incredible AOE spells</span>
+              <span class="strength-badge">✓ Versatile element types</span>
+              <span class="weakness-badge">✗ High FP costs</span>
+              <span class="weakness-badge">✗ Holy weak in late game</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arcane Build -->
+    <div class="build-panel reveal" id="build-arc">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+        <div>
+          <div class="card" style="padding:2rem;">
+            <div class="card-corner tl"></div><div class="card-corner tr"></div><div class="card-corner bl"></div><div class="card-corner br"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+              <span style="font-size:2rem;">🩸</span>
+              <div>
+                <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1.3rem;">Blood Lord — Death Rite</h3>
+                <p style="font-size:0.8rem;color:var(--text-dim);">Recommended Class: Bandit / Confessor</p>
+              </div>
+            </div>
+            <p style="color:var(--text-rune);font-size:0.95rem;margin-bottom:1.5rem;line-height:1.7;">Arcane governs Item Discovery and scales Bleed, Scarlet Rot, Poison, and Death Blight. The Occult affinity scales purely with Arcane and doesn't reduce other scaling. Mohgwyn's Sacred Spear combined with Bloodboon incantations creates a devastating blood build. Death Rite sorceries are DLC exclusive and devastate undead-type enemies.</p>
+            <h4 style="font-family:'Cinzel',serif;color:var(--text-rune);font-size:0.8rem;letter-spacing:0.15em;margin-bottom:1rem;text-transform:uppercase;">Stat Distribution (Endgame)</h4>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Vigor</span><span>60</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="80"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Strength</span><span>24</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="32"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Dexterity</span><span>20</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="27"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Faith</span><span>30</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="40"></div></div></div>
+            <div class="stat-bar-wrap"><div class="stat-bar-label"><span>Arcane</span><span>80</span></div><div class="stat-bar-track"><div class="stat-bar-fill" data-w="100"></div></div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Core Weapons & Spells</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="weapon-tag">Mohgwyn's Sacred Spear</span>
+              <span class="weapon-tag">Eleonora's Poleblade</span>
+              <span class="weapon-tag">Bloodboon Incantation</span>
+              <span class="weapon-tag">Swarm of Flies</span>
+              <span class="weapon-tag">Death Sorceries (DLC)</span>
+            </div>
+          </div>
+          <div class="card" style="padding:1.5rem;">
+            <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.1em;margin-bottom:1rem;">Strengths & Weaknesses</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <span class="strength-badge">✓ Extremely high DPS via bleed</span>
+              <span class="strength-badge">✓ High item discovery (farming)</span>
+              <span class="strength-badge">✓ Versatile status effects</span>
+              <span class="weakness-badge">✗ Bleed immune bosses hard counter</span>
+              <span class="weakness-badge">✗ Weaker at low arcane</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════ BOSSES ═══════════════════════ -->
+<section class="section" id="bosses">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-pretitle">✦ Conquer the Demigods ✦</span>
+      <h2 class="section-title">Boss Strategies</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Detailed tactical guides for every major boss. Click any card to open full strategy — including phase breakdowns, recommended gear, and key attack patterns.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;" id="bosses-grid">
+
+      <!-- BOSS CARDS generated by JS below -->
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ REGIONS ═══════════════════════ -->
+<section class="section section-alt" id="regions">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-pretitle">✦ The Lands Between ✦</span>
+      <h2 class="section-title">Regions & Exploration Guide</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Navigate every corner of the Lands Between and the Realm of Shadow with expert guidance on key locations, secrets, and traversal order.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;" id="regions-grid">
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ QUESTLINES ═══════════════════════ -->
+<section class="section" id="quests">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-pretitle">✦ Fates Entwined ✦</span>
+      <h2 class="section-title">NPC Questlines</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Complete walkthroughs for the most important NPC questlines in Elden Ring. These interconnected stories unlock unique rewards, alternate endings, and hidden lore.</p>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0;border-bottom:1px solid var(--border-gold);" class="reveal" id="quest-tabs">
+    </div>
+    <div id="quest-panels"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ WEAPONS ═══════════════════════ -->
+<section class="section section-alt" id="weapons">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-pretitle">✦ Arsenal ✦</span>
+      <h2 class="section-title">Weapons & Gear Tier List</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">The definitive guide to the most powerful weapons in Elden Ring and Shadow of the Erdtree. Including location, scaling, and recommended infusions.</p>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:2rem;" class="reveal">
+      <button class="build-tab active" onclick="switchWeaponTab('all',this)">All Weapons</button>
+      <button class="build-tab" onclick="switchWeaponTab('greatsword',this)">Greatswords</button>
+      <button class="build-tab" onclick="switchWeaponTab('katana',this)">Katanas</button>
+      <button class="build-tab" onclick="switchWeaponTab('staff',this)">Staves & Seals</button>
+      <button class="build-tab" onclick="switchWeaponTab('dlc',this)">DLC Weapons</button>
+    </div>
+
+    <div class="reveal" style="overflow-x:auto;">
+      <table class="weapons-table" id="weapons-table">
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Weapon</th>
+            <th>Type</th>
+            <th>Scaling</th>
+            <th>Best Infusion</th>
+            <th>Location</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="weapons-tbody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ COMMUNITY ═══════════════════════ -->
+<section class="section" id="community">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-pretitle">✦ Fellowship of the Tarnished ✦</span>
+      <h2 class="section-title">Community Voices</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Words from fellow Tarnished who have walked the path before you. Share your own wisdom below.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;margin-bottom:3rem;">
+      <!-- Comments injected by JS -->
+    </div>
+
+    <!-- Add Comment Form -->
+    <div class="card reveal" style="max-width:640px;margin:0 auto;padding:2rem;">
+      <div class="card-corner tl"></div><div class="card-corner tr"></div><div class="card-corner bl"></div><div class="card-corner br"></div>
+      <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1rem;letter-spacing:0.1em;margin-bottom:1.5rem;text-align:center;">Leave Your Mark, Tarnished</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <input id="c-name" type="text" placeholder="Your name..." style="background:rgba(255,255,255,0.04);border:1px solid var(--border-gold);color:var(--text-rune);padding:10px 14px;font-family:'Crimson Pro',serif;font-size:0.95rem;outline:none;width:100%;"/>
+        <textarea id="c-text" rows="3" placeholder="Share your wisdom..." style="background:rgba(255,255,255,0.04);border:1px solid var(--border-gold);color:var(--text-rune);padding:10px 14px;font-family:'Crimson Pro',serif;font-size:0.95rem;outline:none;resize:vertical;width:100%;"></textarea>
+        <button class="btn-primary" onclick="addComment()" style="align-self:flex-start;">⚔ Post Comment</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-rune">✦ ELDEN RING ✦</div>
+    <div style="width:300px;height:1px;background:linear-gradient(to right,transparent,var(--gold-dark),transparent);margin:0 auto 2rem;"></div>
+    <div style="display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem;">
+      <span class="footer-link" onclick="scrollTo('guide')">New Player Guide</span>
+      <span class="footer-link" onclick="scrollTo('builds')">Builds</span>
+      <span class="footer-link" onclick="scrollTo('bosses')">Boss Strategies</span>
+      <span class="footer-link" onclick="scrollTo('regions')">Regions</span>
+      <span class="footer-link" onclick="scrollTo('quests')">Questlines</span>
+      <span class="footer-link" onclick="scrollTo('weapons')">Weapons</span>
+    </div>
+    <p style="text-align:center;color:var(--text-dim);font-size:0.78rem;font-style:italic;">
+      Elden Ring © 2022 FromSoftware Inc. / BANDAI NAMCO Entertainment Inc.<br/>
+      This is a fan-made strategy compendium. Not affiliated with or endorsed by FromSoftware.
+    </p>
+    <p style="text-align:center;color:rgba(201,162,39,0.2);font-family:'Cinzel Decorative',serif;font-size:0.6rem;margin-top:1.5rem;letter-spacing:0.3em;">
+      MAY GRACE GUIDE THEE
+    </p>
+  </div>
+</footer>
+
+<!-- ═══════════════════════ BACK TO TOP ═══════════════════════ -->
+<button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<!-- ═══════════════════════ BOSS MODAL ═══════════════════════ -->
+<div class="modal-backdrop" id="boss-modal" onclick="closeBossModal(event)">
+  <div class="modal-box" id="boss-modal-box">
+    <div class="modal-header" id="boss-modal-header"></div>
+    <div class="modal-body" id="boss-modal-body"></div>
+  </div>
+</div>
+
+<style>
+@media(max-width:768px){
+  .md-grid{grid-template-columns:1fr!important;}
+}
+</style>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+
+const BOSSES = [
+  {
+    id:'margit', name:'Margit, the Fell Omen', location:'Stormhill — Stormveil Castle Gate',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/margit-the-fell-omen-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'medium', dlc:false,
+    level:'25–40', souls:'12,000 Runes',
+    reward:'Talisman Pouch, 12,000 Runes',
+    summons:'Rogier NPC summon available nearby',
+    phase1:'Margit uses long-range magic daggers, a staff hammer combo, and a sweeping holy blade. Stay mid-range to bait his dagger throws, then close in for 2–3 hits during his recovery. His staff slam has a delayed smash — don\'t panic roll early. Jump over his low sweeps for bonus poise damage.',
+    phase2:'At roughly 60% HP, Margit summons holy swords that orbit him. These swords will periodically orbit and slash — maintain distance when they appear. His combos extend significantly with 2–3 additional attacks. The holy hammer attack can be two-handed; dodge INTO the first swing for the safest window.',
+    patterns:[
+      {name:'Cane Slam', desc:'Slams his cane with delayed impact. Wait for impact sound, then dodge forward-into to punish.'},
+      {name:'Magic Dagger Throw', desc:'Throws 2–3 daggers in quick succession. Dodge sideways between each one.'},
+      {name:'Holy Blade Sweep', desc:'Wide horizontal slash. Jump or dodge backward with distance. Punish immediately after.'},
+      {name:'Hammer of Grace (Phase 2)', desc:'Massive holy hammer smash. Stay outside melee range or sprint laterally to avoid.'},
+    ],
+    weapons:['Any +3 weapon or higher','Bloodhound\'s Fang (Weeping Peninsula)','Fire Grease consumables'],
+    ashes:'Lone Wolf Ashes, Jellyfish (for healing), Demi-Human Ashes',
+    tips:'Use Margit\'s Shackle (sold by Patches) to immobilize him twice in Phase 1. Spirit Ashes are highly recommended.',
+    extra:'Margit drops the Talisman Pouch which adds an additional Talisman slot — essential for the rest of the game.'
+  },
+  {
+    id:'godrick', name:'Godrick the Grafted', location:'Stormveil Castle — Throne Room',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/godrick-the-grafted-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'medium', dlc:false,
+    level:'40–55', souls:'20,000 Runes',
+    reward:'Remembrance of the Grafted, Godrick\'s Great Rune',
+    summons:'Nepheli Loux NPC summon outside fog gate',
+    phase1:'Godrick fights with a massive axe and grafted limbs. His combos are telegraphed but long — stay near his axe arm side (player left) as his attacks swing right-to-left. Watch for the grab attack — if caught, he slams you for massive damage. The roll-catch after his axe raises is a common trap; don\'t roll preemptively.',
+    phase2:'At 50% HP, Godrick cuts off his own hand and grafts a dragon head onto his arm. This completely changes his moveset. The dragon fire breath sweeps left-to-right — sprint perpendicular or shelter behind the arena pillars. His combos end with a fire breathe frequently. The dragon head bite has good reach; dodge backward then run in.',
+    patterns:[
+      {name:'Axe Slam Combo', desc:'3-hit axe combo ending in ground slam. Watch the end: he sometimes adds a fourth delayed hit.'},
+      {name:'Tornado Whirlwind', desc:'Spins with both arms extended, windblows players away. Sprint sideways out of range.'},
+      {name:'Dragon Breath (Phase 2)', desc:'Sweeps fire from left to right. Sprint right (toward the sweep direction) to outrun it.'},
+      {name:'Grafted Dragon Slam', desc:'Leaps into air and slams down with the dragon arm. Dodge when he begins descent.'},
+    ],
+    weapons:['Fire-infused weapons deal bonus damage','Any +5 weapon','Flails are excellent for stagger'],
+    ashes:'Nepheli Loux (NPC), Jellyfish, Lone Wolf',
+    tips:'Godrick has a grab attack — the telltale sign is a slow one-armed reach. Dodge to either side immediately.',
+    extra:'Activating his Great Rune at the Divine Tower of Limgrave grants passive HP regen with each kill — excellent for dungeon clearing.'
+  },
+  {
+    id:'rennala', name:'Rennala, Queen of the Full Moon', location:'Raya Lucaria Academy — Grand Library',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/rennala-queen-of-the-full-moon-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'easy', dlc:false,
+    level:'50–65', souls:'40,000 Runes',
+    reward:'Remembrance of the Full Moon Queen, Great Rune of the Unborn',
+    summons:'No summons in Phase 1. Witchbane Ruins spectator can be summoned for Phase 2.',
+    phase1:'Phase 1 takes place in a schoolroom. Rennala floats while students chant and protect her with a golden aura. Listen for the singing student — they will glow gold. Interrupt 3 glowing students by attacking them, which drops Rennala to the ground. Deal heavy burst damage while she is grounded. Repeat 3 times.',
+    phase2:'Rennala enters a dreamscape and fights directly with full sorcery. She opens by teleporting and casting Carian Piercer or a magic barrage. The Giant Crab and Dragon summons are her most dangerous moves — these summons last ~30 seconds and deal massive damage if you fight them instead of Rennala. Maintain aggression on Rennala directly.',
+    patterns:[
+      {name:'Loretta\'s Arrow', desc:'Fires a magic arrow. Dodge sideways — relatively slow projectile.'},
+      {name:'Glintblade Phalanx', desc:'Summons orbiting magic blades. Stay mobile to avoid them tracking you.'},
+      {name:'Dragon Summon', desc:'Summons an ancient dragon. IGNORE the dragon and focus Rennala until it despawns.'},
+      {name:'Carian Slicer', desc:'Quick melee slash. Dodge backward — faster than it looks.'},
+    ],
+    weapons:['Any weapon works, physical damage recommended','Rock Sling (staggers her in Phase 2)'],
+    ashes:'Any summon for Phase 2 distraction',
+    tips:'Rennala is the easiest main boss. Her Great Rune allows character respeccing — infinitely reusable. Save your Larval Tears for builds you want to test.',
+    extra:'The Great Rune of the Unborn (rebirth) is not equipped but used as a key item to respec stats.'
+  },
+  {
+    id:'radahn', name:'Starscourge Radahn', location:'Caelid — Redmane Castle / Aeonia',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/starscourge-radahn-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'hard', dlc:false,
+    level:'70–90', souls:'70,000 Runes',
+    reward:'Remembrance of the Starscourge, Radahn\'s Great Rune',
+    summons:'Multiple NPC summons available across the battlefield — summon ALL of them',
+    phase1:'Radahn is fought on an enormous open battlefield. He begins at range firing magical arrows the size of spears. Rush him on horseback — Torrent is allowed in this fight. Summon all NPC banners on the field as distractions. Get under his horse to avoid most of his mounted attacks. His gravity magic pulls debris and launches it at you.',
+    phase2:'At 50% HP, Radahn launches himself into orbit and crashes down as a meteor. This phase transition has killed more Tarnished than anything else — when you see him ascend, RUN far in any direction and dodge just before impact. Post-meteor Radahn is much more aggressive with shorter combos and a new gravity scarlet rot cloud.',
+    patterns:[
+      {name:'Gravity Arrow Volley', desc:'Fires 3–5 enormous arrows in sequence. Sprint at a 45° angle toward him to close distance safely.'},
+      {name:'Dual Greatsword Flurry', desc:'8+ hit combo. Dodge into him, tracking his body through the swings.'},
+      {name:'Meteor Dive (Phase 2)', desc:'Ascends and crashes as a meteor. Sprint away, dodge when shadow appears under you.'},
+      {name:'Gravity Well', desc:'Pulls player toward him then combo attacks. When grabbed by gravity, dodge repeatedly.'},
+    ],
+    weapons:['Bleed weapons very effective','Frost weapons excellent','Any high-damage choice'],
+    ashes:'Summon NPC signs on field — they are all free',
+    tips:'Radahn respects bleed — two Rivers of Blood katanas can trigger hemorrhage within 10 seconds of Phase 1.',
+    extra:'Required boss for Shadow of the Erdtree DLC access. Defeating him triggers the Malenia questline meteor event in Limgrave.'
+  },
+  {
+    id:'morgott', name:'Morgott, the Omen King', location:'Leyndell, Royal Capital — Erdtree Sanctuary',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/morgott-the-omen-king-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'hard', dlc:false,
+    level:'90–110', souls:'90,000 Runes',
+    reward:'Remembrance of the Omen King, Morgott\'s Great Rune, Rold Medallion (story)',
+    summons:'Melina NPC summon available outside fog gate',
+    phase1:'Morgott fights very similarly to Margit but with expanded moveset and holy weapons. He has a cane-and-dagger combo, a holy blade that he throws into the ground to create explosion patterns, and a spear impalement. His dodge roll catch with the holy spear is particularly dangerous — watch for the golden spear materializing overhead.',
+    phase2:'At roughly 55% HP, Morgott becomes enraged. He enters a kneeling animation then rises empowered with golden ichor dripping from him. His attacks become faster with longer follow-up combos, and his holy spear gains increased range and a ground explosion on impact. His blood curse also poisons the arena floor near the edges.',
+    patterns:[
+      {name:'Holy Knife Rain', desc:'Raises hand — multiple holy knives rain from above in a pattern. Dodge continuously sideways.'},
+      {name:'Holy Spear Impalement', desc:'Raises a golden spear overhead and impales. The follow-up explosion has large radius — get distance.'},
+      {name:'Cane Slap Combo', desc:'5-hit melee string. Dodge into him for the first 2, dodge out for the last 3.'},
+      {name:'Erdtree Curse (Phase 2)', desc:'Golden curse pattern on ground dealing holy damage. Avoid glowing ground patches.'},
+    ],
+    weapons:['Blood weapons', 'Weapon with fire (Morgott\'s weakness)','Gravity-type spells'],
+    ashes:'Lhutel the Headless, Mimic Tear',
+    tips:'Morgott\'s Cursed Sword drops from his Remembrance — one of the best curved greatswords in the game.',
+    extra:'Required boss for story progression. Morgott is the final "normal" Elden Lord stage before reaching the Erdtree interior.'
+  },
+  {
+    id:'fire_giant', name:'Fire Giant', location:'Mountaintops of the Giants — Forge of the Giants',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/fire-giant-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'hard', dlc:false,
+    level:'100–120', souls:'180,000 Runes',
+    reward:'Remembrance of the Fire Giant, Boluses, access to Mountaintops (story)',
+    summons:'No NPC summons. Spirit ashes allowed.',
+    phase1:'The Fire Giant is massive — fight on horseback (Torrent is allowed). His attacks have enormous reach but slow wind-ups. Target his ankles and feet — the weakpoint is a glowing red eye on his ankle. He has a devastating shield slam, a fire roll attack, and a snow sweep. Stay close to his feet, specifically the left ankle with the eye.',
+    phase2:'At roughly 50% HP, the Fire Giant tears off his own upper torso and crawls on his hands. He gains two massive fire bowl attacks that deal catastrophic damage in large areas. His fire rolls become more frequent. Target his back for a weakpoint — there is a massive eye on his upper back now exposed. Use Torrent to dodge his crawling movement.',
+    patterns:[
+      {name:'Foot Stomp', desc:'Simple stomp. Get far away or close to his toes. The "danger zone" is mid-range from his feet.'},
+      {name:'Fire Roll', desc:'Rolls toward player dealing fire damage across a wide line. Sprint perpendicular on Torrent.'},
+      {name:'Fire Bowl (Phase 2)', desc:'Scoops lava from his chest bowl and launches it. Creates massive lava pool. Evacuate the area immediately.'},
+      {name:'Arm Slam (Phase 2)', desc:'Slams both arms into ground creating frost/fire shockwaves. Jump over the ring shockwave.'},
+    ],
+    weapons:['Frostbite weapons reduce his absorption','Any high-damage build'],
+    ashes:'Mimic Tear, Stormhawk Deenh (airborne hitbox), Black Knife Tiche',
+    tips:'The fight is dramatically easier on Torrent. Keep Estus spare for Phase 2 — the fire bowls can be lethal if you\'re caught.',
+    extra:'Required boss to advance story toward the Forge of the Giants and the burning of the Erdtree. Exceptional rune farming opportunity.'
+  },
+  {
+    id:'malenia', name:'Malenia, Blade of Miquella', location:'Miquella\'s Haligtree — Elphael (hidden area)',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/malenia-blade-of-miquella-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'extreme', dlc:false,
+    level:'130–150', souls:'480,000 Runes',
+    reward:'Remembrance of the Rot Goddess, Hand of Malenia weapon',
+    summons:'Millicent (after completing her questline), Alexander\'s Shard',
+    phase1:'Malenia is widely considered the hardest boss in the game. She HEALS on every hit that connects — even through shields, even through spirit ashes. Aggressive play is rewarded; turtling is fatal. Her waterfowl dance (the signature 5-hit combo) is her most dangerous attack — the first swipe can be rolled through, then immediately roll away from the three follow-up slashes, then roll through the final airborne dive. Practice this timing above all else.',
+    phase2:'At death, Malenia explodes into Scarlet Rot petals and transforms into a winged goddess form. Her attacks gain rot scarlet flowers that bloom on impact. She gains a devastating clonal attack where she sends a phantom through the player. Phase 2 Malenia is significantly faster — her waterfowl dance has tighter spacing.',
+    patterns:[
+      {name:'Waterfowl Dance', desc:'Most famous attack in Elden Ring. Four slash-sets: (1) Run away from first swipe → roll left, (2) dodge left through next 3 slashes, (3) run back from overhead swipes, (4) dodge toward her on final slam. Practice repeatedly.'},
+      {name:'Scarlet Aeonia (Phase 2 Opener)', desc:'Dive-bomb from air — creates massive bloom of Scarlet Rot explosion. Sprint far from her landing point.'},
+      {name:'Phantom Clones (Phase 2)', desc:'Summons multiple clones that all fly through the player. Dodge into her real body — clones cannot be blocked.'},
+      {name:'Rot Spores', desc:'Launches clumps of rot that explode. Dodge through them — they have small individual hitboxes.'},
+    ],
+    weapons:['Frost weapons reduce absorption (Malenia is NOT bleed immune)','Mohgwyn\'s Sacred Spear with bleed','Bleed River of Blood stacks well'],
+    ashes:'Black Knife Tiche (does NOT give Malenia lifesteal openings), Mimic Tear (high risk — will die quickly but distracts)',
+    tips:'Never use shield-turtling. Never spam attacks. Wait for her to finish combos, hit 2–3 times, retreat. Patience over aggression.',
+    extra:'Considered one of the hardest bosses in souls history. Many players take 50–100+ attempts. Her Hand of Malenia weapon scales with DEX and uses Waterfowl Dance as the ash of war.'
+  },
+  {
+    id:'placidusax', name:'Dragonlord Placidusax', location:'Crumbling Farum Azula — Hidden Platform (Lie Down)',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/dragonlord-placidusax-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'hard', dlc:false,
+    level:'120–140', souls:'280,000 Runes',
+    reward:'Remembrance of the Dragonlord, Placidusax\'s Ruin incantation',
+    summons:'No NPC summons. Spirit Ashes allowed.',
+    phase1:'Placidusax is one of the most visually spectacular fights. He is a two-headed dragon from a previous age who attacks with lightning, fire, and distortion-time. Stay near his hind legs — many of his forward-facing attacks miss from here. His disappearing teleport attack (he vanishes and reappears with a swipe) is his most dangerous move.',
+    phase2:'At roughly 55% HP, Placidusax begins using golden lightning strikes and a massive golden energy breath. He gains a new combo that creates golden explosion waves. The storm of lightning he calls is the hardest part — sprint in random directions to avoid the bolts that home-in slightly.',
+    patterns:[
+      {name:'Temporal Flare', desc:'Vanishes and slashes through player\'s position. When he disappears, move 10m sideways immediately.'},
+      {name:'Lightning Breath', desc:'Breathes lightning in a sweeping arc. Stay behind his hind legs or sprint perpendicular.'},
+      {name:'Golden Storm (Phase 2)', desc:'Summons massive golden lightning storm. Sprint while weaving — stay moving at all times.'},
+    ],
+    weapons:['Any high damage weapon', 'Lightning-resistant armor recommended','Thops\' Barrier for ranged countering'],
+    ashes:'Mimic Tear, Lhutel the Headless',
+    tips:'To reach Placidusax: in Crumbling Farum Azula, find the floating platform southeast of the Beside the Great Bridge grace. Lie down at the altar.',
+    extra:'Placidusax is an optional secret boss with extraordinary lore — he predates the Elden Ring and was the previous Elden Lord. His incantation reward is one of the most impressive spells visually.'
+  },
+  {
+    id:'beast_clergyman', name:'Beast Clergyman / Maliketh', location:'Crumbling Farum Azula — Maliketh\'s Boss Room',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/maliketh-the-black-blade-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'hard', dlc:false,
+    level:'120–135', souls:'220,000 Runes',
+    reward:'Remembrance of the Black Blade, Maliketh\'s Black Blade weapon',
+    summons:'Dragonbarrow NPC summon sign available',
+    phase1:'Beast Clergyman is an agile melee fighter who throws knives, slams the ground, and uses powerful beast claws. He can easily be interrupted with staggers — use jumping attacks frequently. His main danger is combo extensions — he often adds 1–2 extra hits after you think the combo is finished.',
+    phase2:'At roughly 50% HP, Beast Clergyman becomes Maliketh the Black Blade in a dramatic cutscene. Maliketh is EXTREMELY fast — possibly the fastest boss in the game. His black blade attacks reduce your maximum HP temporarily (shown in dark red). This HP reduction can kill you even with full health in late Phase 2.',
+    patterns:[
+      {name:'Death Slash', desc:'Quick black blade slash. Dodge backward — has more range than it appears. The HP reduction lingers.'},
+      {name:'Black Blade Shockwave', desc:'Slams blade into ground — sends shockwaves across floor. Jump over them.'},
+      {name:'Ceiling Leap Combo', desc:'Leaps to ceiling/wall then dives with a slash combo. Track him with camera and dodge when he descends.'},
+      {name:'Curse of Death', desc:'Phase 2 ultimate — multiple black blade explosions tracking player. Dodge continuously into each explosion.'},
+    ],
+    weapons:['High DPS weapons important — fight should be short','Bleed excellent for Phase 2','Any +24/25 weapon'],
+    ashes:'Black Knife Tiche (excellent), Mimic Tear',
+    tips:'Aggressive play is rewarded in Phase 2 — Maliketh has less time to attack if you\'re always hitting him. Learn jump attack timing to interrupt Phase 1 effectively.',
+    extra:'Defeating Maliketh triggers the collapse of Leyndell into ash — the city transforms into Ashen Capital permanently for your save file.'
+  },
+  {
+    id:'elden_beast', name:'Elden Beast (Final Boss)', location:'Erdtree — Golden Order Interior',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/elden-beast-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'hard', dlc:false,
+    level:'130–150', souls:'500,000 Runes',
+    reward:'Elden Ring achievement, Age of Fracture ending',
+    summons:'No summons. Comes after defeating Radagon of the Golden Order.',
+    phase1:'Radagon of the Golden Order is the first half of the final boss encounter. He fights with holy hammers and summons golden beams. Lightning resistance is key. His most dangerous attack is a series of jumping hammer slams with explosions. Frost weapons reduce his damage absorption significantly. Aggressive play is rewarded.',
+    phase2:'After defeating Radagon, the Elden Beast emerges from his body — you cannot heal between these two fights. The Elden Beast flies around the arena (which is enormous) and must be kept in camera view. It attacks with holy energy constructs including a galaxy slam, a sword of light, and constellation bombs. Stay in close range at all times — most of its ranged attacks have limited close-range coverage.',
+    patterns:[
+      {name:'Elden Stars', desc:'Fires a massive homing ball of golden stars. Sprint sideways — the orb is faster than it looks.'},
+      {name:'Holy Ring', desc:'Creates golden rings that close in. Dodge through them at the last second.'},
+      {name:'Elden Sword', desc:'Manifests a massive golden sword and slashes. Stay close to its body — the sword only reaches mid-range.'},
+      {name:'Constellation Blast', desc:'Creates a star pattern on the ground. Memorize the safe tiles and avoid highlighted spots.'},
+    ],
+    weapons:['Black Flame highly effective (deals % max HP damage)','Non-holy weapons preferable','Fire or physical recommended'],
+    ashes:'No summons available — rely on your own skill',
+    tips:'NEVER run away from the Elden Beast — it will regain HP from the golden water. Immediately swim back toward it. Use Torrent if available (it\'s NOT available in this fight however).',
+    extra:'The final boss of the base game. The Elden Beast is a literal embodiment of the Greater Will\'s message — it has watched over all of history. The music is one of the greatest video game compositions ever written.'
+  },
+  {
+    id:'messmer', name:'Messmer the Impaler (DLC)', location:'Shadow Keep — Specimen Storehouse',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/messmer-the-impaler-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'hard', dlc:true,
+    level:'155–175', souls:'380,000 Runes + Scadutree Blessing shards',
+    reward:'Remembrance of the Impaler, Shadow Realm access progression',
+    summons:'Hornsent NPC Summon near fog gate',
+    phase1:'Messmer is a lancer who also controls snake-fire — a red, writhing flame. He moves extremely rapidly with his spear and has terrifying combo range. The key insight: Messmer has clear openings after his 3-hit spear combo. His snake-fire attacks are telegraphed by a red glow on his arms. Fire resistance talismans are essential.',
+    phase2:'At roughly 50% HP, Messmer transforms — his snakes emerge fully and he enters a serpent fusion form. He gains a devastating serpent dive that creates fire pools, and a multi-snake burst attack. His Phase 2 opener is a massive fire explosion — ensure full HP before entering this phase.',
+    patterns:[
+      {name:'Spear Combo', desc:'3–5 hit thrusting spear combo. Dodge sideways — thrusts have narrow hitboxes.'},
+      {name:'Snake Fire Pillar', desc:'Slams ground creating columns of red snake-fire. Dodge through the columns at close range.'},
+      {name:'Serpent Dive (Phase 2)', desc:'Launches into air and dives down wrapped in snakes. Sprint perpendicular to his trajectory.'},
+    ],
+    weapons:['Holy-resistant armor (Messmer deals fire/holy)','Lightning weapons deal bonus damage to him','Frost to reduce resistance'],
+    ashes:'Hornsent NPC, Black Knife Tiche',
+    tips:'Messmer is considered by many to be the best designed boss in the DLC — his moveset is telegraphed, fair, and deeply satisfying to learn.',
+    extra:'Messmer holds crucial DLC lore — he is Marika\'s abandoned son, hidden in the Realm of Shadow. His motivations make him one of the most sympathetic antagonists.'
+  },
+  {
+    id:'midra', name:'Midra, Lord of Frenzied Flame (DLC)', location:'Ruins of Rauh — Manor of the Erdtree',
+    img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/midra-lord-of-frenzied-flame-boss-elden-ring-wiki-guide.jpg',
+    difficulty:'extreme', dlc:true,
+    level:'160–180', souls:'420,000 Runes',
+    reward:'Remembrance of the Lord of Frenzied Flame, Midra\'s Flame incantations',
+    summons:'Thiollier NPC Summon (if questline complete)',
+    phase1:'Midra begins as a seemingly weak, shuffling figure — but quickly reveals his true nature. Phase 1 features slow but powerful attacks with a purple Frenzy sword and reaching grabs. He can proc Madness buildup rapidly — maintain Robustness with Mind-Stealing Cracked Tear in Physick. His Phase 1 is more learning curve than danger.',
+    phase2:'Midra\'s true form is revealed as the Lord of Frenzied Flame. His Phase 2 is an enormous, towering fire figure. His frenzy flame attacks deal massive damage AND cause instant madness proc if caught repeatedly. The AOE frenzy explosion on transformation nearly covers the arena — position at extreme edge and sprint when you see the glow.',
+    patterns:[
+      {name:'Frenzy Grab', desc:'Slow reaching grab. If caught, deals massive damage and instills madness. Dodge sideways immediately when hands open.'},
+      {name:'Frenzy Flame Beam (Phase 2)', desc:'Horizontal beam of yellow frenzy flame. Jump or get extreme distance.'},
+      {name:'Madness Eruption', desc:'Triggers ground eruptions of frenzy flame beneath player. Move constantly to avoid ground targeting.'},
+    ],
+    weapons:['High Robustness armor for madness resistance','Any high-damage weapon'],
+    ashes:'Thiollier NPC (great distraction), Black Knife Tiche',
+    tips:'Stock Clarifying Boluses (cure madness). Equip the Clarifying Horn Charm talisman. High Robustness rating from armor reduces Madness buildup.',
+    extra:'Midra is connected to the Three Fingers lore. Defeating him rewards incantations tied to the frenzied flame — some of the most visually striking spells in the DLC.'
+  },
+];
+
+const REGIONS = [
+  {
+    name:'Limgrave', img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/limgrave-region-elden-ring-wiki-guide.jpg',
+    level:'Level 1–40',tag:'Starting Area',
+    desc:'The verdant starting region — deceptively peaceful until the first Tree Sentinel charges you on horseback. Home to Stormveil Castle and the first shardbearer Godrick.',
+    bosses:'Margit • Godrick • Tree Sentinel • Agheel • Crucible Knight',
+    locations:'Stormveil Castle • Murkwater Cave • Groveside Cave • Farofar Island • Deathtouched Catacombs',
+    secrets:'Tombsward Cave contains the Mushroom set. Gael Tunnel has respectable early smithing stones.',
+    tip:'Don\'t ignore Weeping Peninsula to the south — it has the Bloodhound\'s Fang and the Erdtree Burial Watchdog boss.'
+  },
+  {
+    name:'Liurnia of the Lakes', img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/liurnia-of-the-lakes-region-elden-ring-wiki-guide.jpg',
+    level:'Level 40–70',tag:'Magic Region',
+    desc:'An enormous flooded lake region surrounding the Raya Lucaria Academy. Home to sorceresses, bizarre constructs, and the hauntingly beautiful Carian Manor.',
+    bosses:'Rennala • Royal Knight Loretta • Erdtree Avatar • Bols, Carian Knight',
+    locations:'Raya Lucaria Academy • Carian Study Hall • Village of Albinaurics • Four Belfries',
+    secrets:'The Carian Study Hall inverts when you use the Carian Inverted Statue — reveals new platforming challenge and the Cursemark of Death.',
+    tip:'Ranni\'s questline begins in the Carian Manor northwest. Starting it early is highly recommended for the best ending.'
+  },
+  {
+    name:'Caelid', img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/caelid-region-elden-ring-wiki-guide.jpg',
+    level:'Level 60–90',tag:'Scarlet Rot',
+    desc:'A blighted wasteland consumed by Malenia\'s Scarlet Rot. Blood-red skies, diseased monsters, and home to the terrifying Radahn. Do NOT enter early.',
+    bosses:'Starscourge Radahn • Commander O\'Neil • Cleanrot Knight Twins • Putrid Tree Spirit',
+    locations:'Redmane Castle • Aeonia Swamp • Dragonbarrow • Sellia Town • Fort Gael',
+    secrets:'Dragonbarrow has end-game tier loot including the Flamedrake Talisman and high-level smithing stones. Isolated Merchant sells the Nomadic Warrior\'s Cookbook [17].',
+    tip:'The Divine Tower of Caelid (Dragonbarrow) activates Radahn\'s Great Rune. Don\'t neglect this even if you don\'t plan to use his rune.'
+  },
+  {
+    name:'Altus Plateau & Leyndell', img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/altus-plateau-region-elden-ring-wiki-guide.jpg',
+    level:'Level 80–110',tag:'Royal Capital',
+    desc:'The elevated plateau and the golden royal capital of Leyndell. Ancient, majestic architecture belying a civilization shaped by the Elden Ring\'s influence. Contains some of the richest lore in the game.',
+    bosses:'Morgott • Godfrey (ghost) • Erdtree Avatar • Draconic Tree Sentinel',
+    locations:'Leyndell Royal Capital • Altus Plateau • Wyndham Ruins • Auriza Hero\'s Grave • Minor Erdtrees',
+    secrets:'The Shaded Castle northwest contains the Valkyrie\'s Prosthesis for Millicent\'s questline. Volcano Manor is accessible from Altus.',
+    tip:'Before burning the Erdtree, fully explore Leyndell — it permanently transforms into Ashen Capital after Maliketh is defeated, removing some items.'
+  },
+  {
+    name:'Mountaintops of the Giants', img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/mountaintops-of-the-giants-region-elden-ring-wiki-guide.jpg',
+    level:'Level 100–130',tag:'Frozen Peaks',
+    desc:'A frozen, desolate mountain range home to the ancient Giants who war with the Erdtree. Home to the final mandatory boss before the Forge of the Giants.',
+    bosses:'Fire Giant • Commander Niall • Borealis the Freezing Fog',
+    locations:'Forge of the Giants • Giants\'s Gravepost • Castle Sol • Zamor Ruins',
+    secrets:'Castle Sol contains the Snow Witch armor set and the north half of the Haligtree Secret Medallion, required to reach the Haligtree where Malenia resides.',
+    tip:'Use Torrent constantly in this area — the frost-proc from standing in snow accumulates rapidly and can kill you unexpectedly.'
+  },
+  {
+    name:'Crumbling Farum Azula', img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/crumbling-farum-azula-region-elden-ring-wiki-guide.jpg',
+    level:'Level 115–140',tag:'Ancient Ruins',
+    desc:'A sky-island of collapsing ruins from an ancient era, suspended in a perpetual storm. One of the most visually breathtaking areas in gaming history.',
+    bosses:'Maliketh • Dragonlord Placidusax • Godskin Duo',
+    locations:'Dragon Temple • Tempest-Facing Balcony • Dragon Temple Lift',
+    secrets:'Placidusax is the secret by lying down at the levitating altar in the floating platform. Bring Preserving Boluses — scarlet rot accumulates in some zones.',
+    tip:'Farum Azula has some of the best walking speed Greatswords and armor sets. Explore every branching path.'
+  },
+  {
+    name:'Shadow Keep (DLC)', img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/shadow-keep-region-elden-ring-shadow-of-the-erdtree-wiki-guide.jpg',
+    level:'Level 150–175',tag:'DLC — Shadow Realm',
+    desc:'A harrowing fortress within the Realm of Shadow, guarded by Messmer the Impaler. Burned and ancient, the keep holds the darkest secrets of Miquella\'s past.',
+    bosses:'Messmer the Impaler • Commander Gaius • Golden Hippopotamus • Scadutree Avatar',
+    locations:'Specimen Storehouse • Shadow Keep Main Gate • Ancient Ruins of Rauh • Ruins of Unte',
+    secrets:'The Thiollier questline gives access to the Frenzied Flame incantations. The Furnace Golems across the DLC drop enormous runes and smithing items.',
+    tip:'Scadutree Fragments are the most important collectible in the DLC — they multiply your damage dealt and reduce damage taken. Prioritize finding all of them.'
+  },
+  {
+    name:'Enir-Ilim (DLC Final Area)', img:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/enir-ilim-region-elden-ring-shadow-of-the-erdtree-wiki-guide.jpg',
+    level:'Level 170–200',tag:'DLC — Endgame',
+    desc:'The divine city at the heart of the Realm of Shadow. A radiant, golden labyrinth where Miquella\'s plan reaches its conclusion and the final DLC boss awaits.',
+    bosses:'Promised Consort Radahn (Final DLC Boss) • Divine Beast Dancing Lion',
+    locations:'Spiraling Enir-Ilim • Foot of the Empyrean Throne • Cleansing Chamber Anteroom',
+    secrets:'The highest-tier Scadutree Fragments are concentrated here — essential for the final fight. Ancient Dragon Smithing Stones available before the final boss.',
+    tip:'Bring maximum Scadutree Blessing (level 20+) for the final boss — Consort Radahn is considered equal in difficulty to base game Malenia.'
+  },
+];
+
+const QUESTS = [
+  {
+    name:'Ranni the Witch',npc:'Ranni',
+    desc:'The most important questline in Elden Ring — leads to the secret Age of Stars ending and rewards the iconic Dark Moon Greatsword.',
+    reward:'Dark Moon Greatsword, Age of Stars ending, Miniature Ranni ashes',
+    steps:[
+      {title:'Meet Ranni at Carian Manor',desc:'Travel to the Three Sisters sub-region northwest of Liurnia. Climb to the tallest tower and meet Ranni. Accept her request to serve her.'},
+      {title:'Speak to Ranni\'s allies',desc:'In the tower below Ranni, meet Blaidd, Seluvis, and War Counselor Iji. Each has useful items and their own questlines.'},
+      {title:'Find the Fingerslayer Blade',desc:'Travel to Nokron, Eternal City (accessible after defeating Radahn in Caelid). Deep within Nokron, find the Night\'s Sacred Ground and retrieve the Fingerslayer Blade from a chest.'},
+      {title:'Receive the Miniature Ranni',desc:'Return the blade to Ranni. She gives you her puppet — the Miniature Ranni doll. Speak to it while resting at a Site of Grace multiple times. Ranni eventually speaks.'},
+      {title:'Reach the Deeproot Depths',desc:'Travel through Nokron deeper into the Ainsel River and then Deeproot Depths. Here you encounter Blaidd\'s darker fate and the Fia questline intersects.'},
+      {title:'Find the Cursemark of Death',desc:'In the Carian Study Hall (inverted using the Carian Inverted Statue), platforming through the inverted library leads to the Cursemark of Death item.'},
+      {title:'Enter the Renna\'s Rise Portal',desc:'Return to the Three Sisters — the previously locked portal in Renna\'s Rise is now open. It teleports you to the Lake of Rot.'},
+      {title:'Lake of Rot to Astel',desc:'Navigate the Lake of Rot (Preserving Boluses essential), reach the underground arena and defeat Astel, Naturalborn of the Void — one of the most stunning boss designs.'},
+      {title:'Reach the Moonlight Altar',desc:'Beyond Astel, a portal leads to the Moonlight Altar sub-region. Here, defeat Glintstone Dragon Adula, then find Ranni\'s body in the Cathedral of Manus Celes.'},
+      {title:'Complete the questline',desc:'Place the Dark Moon Ring on Ranni\'s finger. She awakens, gifts you the Dark Moon Greatsword, and the Age of Stars ending becomes available at the Fractured Marika.'},
+    ],
+    ending:'Age of Stars — Ranni leads the Tarnished as consort to the moon, removing the influence of the Greater Will from the Lands Between.'
+  },
+  {
+    name:'Millicent\'s Questline',npc:'Millicent',
+    desc:'The most emotionally resonant questline in the game — a young Scarlet Rot patient searching for her own fate. Connected to Malenia and the Haligtree.',
+    reward:'Millicent\'s Prosthesis, Rotten Winged Sword Insignia, Unalloyed Gold Needle (to cure Frenzied Flame)',
+    steps:[
+      {title:'Gowry\'s Shack in Caelid',desc:'Find Gowry\'s Shack in southern Caelid. He asks you to bring him the Unalloyed Gold Needle from the scarlet valleyed Commander O\'Neil fight.'},
+      {title:'Defeat Commander O\'Neil',desc:'In the Aeonia Swamp, fight Commander O\'Neil who guards the needle. Bring Preserving Boluses — the swamp causes constant rot buildup.'},
+      {title:'Return to Gowry — get repaired needle',desc:'Give the broken needle to Gowry. He repairs it and tells you of Millicent at the Church of the Plague.'},
+      {title:'Give Millicent the needle',desc:'Travel to the Church of the Plague (northeast Caelid). Give Millicent the Gold Needle — she begins to recover from her rot disease.'},
+      {title:'Follow Millicent\'s journey',desc:'Millicent travels — find her at the Erdtree-Gazing Hill in Altus Plateau, then at the Shaded Castle where she requests her Prosthetic Arm.'},
+      {title:'Find the Valkyrie\'s Prosthesis',desc:'Deep in the Shaded Castle, find the Valkyrie\'s Prosthesis in a chest near a troll enemy. Return it to Millicent.'},
+      {title:'Haligtree appearance',desc:'After defeating Loretta in the Haligtree, find Millicent at the Prayer Room Site of Grace. She reveals she is one of Malenia\'s children.'},
+      {title:'Final choice',desc:'In Elphael after defeating Malenia, a summon sign appears near a scarlet pool. Help Millicent against her hostile sisters OR invade her world. Helping grants the Rotten Winged Sword Insignia talisman. Defeating her grants the Unalloyed Gold Needle for Miquella\'s Needle (prevents the Frenzied Flame ending).'},
+    ],
+    ending:'Millicent finds peace — either accepting her rot and returning to the swamp, or choosing to live on her own terms, depending on the player\'s actions.'
+  },
+  {
+    name:'Fia, Deathbed Companion',npc:'Fia',
+    desc:'The questline that leads to the Age of Duskborn ending and reveals the hidden lore around Death Runes and the removal of the Tarnished\'s immortality.',
+    reward:'Radiant Baldachin\'s Blessing, Weathered Dagger, Age of Duskborn ending, Fia\'s Mist incantation',
+    steps:[
+      {title:'Meet Fia at Roundtable Hold',desc:'Fia offers to hold you — accept for the Baldachin\'s Blessing item (temporary defense boost, reduces max HP until used).'},
+      {title:'Receive the Weathered Dagger',desc:'After several visits and hugs, Fia gives you the Weathered Dagger and asks you to deliver it to its rightful owner.'},
+      {title:'Give the dagger to D',desc:'D, Hunter of the Dead, is in Roundtable Hold. Give him the dagger. He recognizes it as his — and the questline takes a dark turn.'},
+      {title:'Deeproot Depths',desc:'Travel to Deeproot Depths through Nokron. Find Fia in a decrepit area — she is holding D\'s body and has made a terrible choice.'},
+      {title:'Acquire the Cursemark of Death',desc:'In the Carian Study Hall (inverted), retrieve the Cursemark of Death — Ranni\'s Death Rune that was removed from her. Required for Fia\'s plan.'},
+      {title:'Give the Cursemark to Fia',desc:'Return the Cursemark of Death to Fia in Deeproot Depths. She begins her ritual to revive the Prince of Death.'},
+      {title:'Defeat Lichdragon Fortissax',desc:'Rest, then return to Fia. She asks you to enter her dream. Fight Lichdragon Fortissax inside the dream — a spectral purple dragon boss.'},
+      {title:'Receive the Mending Rune',desc:'Fia passes and gives you the Mending Rune of the Death-Prince. Use this at the Fractured Marika for the Age of Duskborn ending.'},
+    ],
+    ending:'Age of Duskborn — Death is restored to the Lands Between, allowing the Tarnished to finally die. A bittersweet ending that restores natural order.'
+  },
+  {
+    name:'Patches the Untethered',npc:'Patches',
+    desc:'The beloved recurring FromSoftware merchant and trickster. His questline involves betrayal, reconciliation, and access to Volcano Manor.',
+    reward:'Patches\' Bell Bearing, exclusive items, Magma Whip Candlestick access',
+    steps:[
+      {title:'Murkwater Cave encounter',desc:'Find Patches in Murkwater Cave (Limgrave river). He locks you in a trap. When confronted, plead or fight — choosing not to kill him allows his questline to proceed.'},
+      {title:'Patches opens shop',desc:'After the encounter, Patches opens a traveling shop. Buy his exclusive goods — he sells the Grovel for Life gesture, Patches\' Bell Bearing, and rare crafting materials.'},
+      {title:'Liurnia ambush',desc:'Patches appears at the Scenic Isle grace in Liurnia and tricks you into a chest that teleports you to the Mistwood. Not harmful but amusing.'},
+      {title:'Volcano Manor invitation',desc:'Find Patches near the Erdtree-Gazing Hill in Altus. He offers a way into Volcano Manor without fighting Rykard\'s guards — a valuable shortcut.'},
+      {title:'Shaded Castle',desc:'In the Shaded Castle Ramparts, Patches appears again — claiming to have been sent to capture Tanith. He\'s lying, naturally. Exhaust his dialogue.'},
+      {title:'Patches completes his arc',desc:'At the end of Patches\' story, if kept alive, he relocates to Leyndell and eventually leaves behind his bell bearing for the Twin Maiden Husks. His stock then becomes permanently purchasable.'},
+    ],
+    ending:'Patches disappears into the world after his story concludes — presumably onto his next adventure, as always.'
+  },
+  {
+    name:'Alexander, Iron Fist',npc:'Alexander',
+    desc:'The cheerful and noble pot warrior on a grand adventure to become the finest fighter in all the Lands Between. A fan favorite with a heartbreaking conclusion.',
+    reward:'Alexander\'s Innards, Shard of Alexander talisman (one of the best in the game)',
+    steps:[
+      {title:'Limgrave — stuck in the ground',desc:'Find Alexander stuck in a hole north of Saintsbridge. Hit him from behind with a heavy attack to free him. He thanks you warmly.'},
+      {title:'Gael Tunnel',desc:'Find Alexander inside Gael Tunnel in Caelid, preparing for the Radahn Festival. He\'s delightfully optimistic about fighting a demigod.'},
+      {title:'Radahn Festival',desc:'Find Alexander\'s summon sign on the Radahn battlefield. Summon him for the fight — he fights valiantly. Speak to him afterward in the celebration.'},
+      {title:'Liurnia — stuck again',desc:'Alexander gets stuck in the ground again in Liurnia near the ravine road. Free him again with an oil pot then fire attack — or use Kukri throwing knives.'},
+      {title:'Volcano Manor',desc:'Meet Alexander at the lava lake in Mt. Gelmir, training by bathing in lava. He\'s covered in oil to protect himself. Speak with him to hear his progress.'},
+      {title:'Farum Azula — final meeting',desc:'At the Crumbling Farum Azula, near the Dragon Temple Lift site of grace, Alexander awaits for a final duel. This is their last encounter — he believes fighting you is the ultimate test.'},
+      {title:'Defeat Alexander',desc:'Fighting Alexander is required to complete the questline. Defeating him grants Alexander\'s Innards and the Shard of Alexander talisman (+15% skill damage — top-tier talisman). He asks you to carry his essence forward.'},
+    ],
+    ending:'Alexander lives on within you — his Innards can be used to enhance a puppet spirit ash. The Shard of Alexander is one of the most powerful talismans in the game for ash-of-war builds.'
+  },
+];
+
+const WEAPONS_DATA = [
+  {tier:'S',name:'Rivers of Blood',type:'Curved Sword / Katana',scaling:'E/D/D/C (ARC)',infusion:'No infusion (innate bleed)',location:'Volcano Manor — Bloody Finger Hunter Yura invades near Church of Repose (Mountaintops)',notes:'Best bleed weapon. Corpse Piler skill hits 4x and procs bleed almost instantly. Essential for Arcane builds.',cat:'katana'},
+  {tier:'S',name:'Moonveil',type:'Katana',scaling:'E/D/S (INT)',infusion:'Magic (base)',location:'Dropped by Magma Wyrm in Gael Tunnel (Caelid)',notes:'Transient Moonlight deals enormous ranged magic damage. Works as a melee/spell hybrid. Nerf from 1.04 but still top-tier.',cat:'katana'},
+  {tier:'S',name:'Greatsword',type:'Colossal Sword',scaling:'D/E',infusion:'Heavy (STR to S)',location:'Chest in Caelid near Caelem Ruins (guarded by dogs)',notes:'Ultra-STR weapon — scales to S with Heavy infusion at 80 STR. Lion\'s Claw ash hits harder than most bosses.',cat:'greatsword'},
+  {tier:'S',name:'Starscourge Greatsword',type:'Colossal Sword',scaling:'D/D',infusion:'Cannot infuse (boss weapon)',location:'Enia — trade Radahn\'s Remembrance',notes:'Gravity wells on weapon skill pull enemies together. Dual-wield possible. Exceptional for strength DEX hybrid.',cat:'greatsword'},
+  {tier:'A',name:'Blasphemous Blade',type:'Greatsword',scaling:'D/D/D/C (FTH)',infusion:'Cannot infuse',location:'Enia — trade Rykard\'s Remembrance',notes:'Taker\'s Flames heals on kill (passive) AND on skill use. Near-infinite healing makes it excellent for attrition fights.',cat:'greatsword'},
+  {tier:'A',name:'Dark Moon Greatsword',type:'Greatsword',scaling:'C/E/B',infusion:'Cannot infuse',location:'Ranni questline reward (final step)',notes:'Charged heavy adds cold damage. Moonlight Greatsword legacy weapon — iconic. Excellent INT build main weapon.',cat:'greatsword'},
+  {tier:'A',name:'Lusat\'s Glintstone Staff',type:'Staff',scaling:'B/S (INT)',infusion:'Staff (cannot)',location:'Sellen questline reward — Sellia Hideaway (Caelid)',notes:'Highest sorcery scaling in game. FP cost increase (-50% FP efficiency) — use with Cerulean Hidden Tear. Must-have for INT builds.',cat:'staff'},
+  {tier:'A',name:'Golden Order Seal',type:'Sacred Seal',scaling:'C/C/D (FTH/INT)',infusion:'Seal (cannot)',location:'Fringefolk Hero\'s Grave — second chest (Limgrave)',notes:'Buffs fundamentalist incantations. Ideal for INT/FTH hybrid. Scaling at 40/40 is excellent for mixed builds.',cat:'staff'},
+  {tier:'S',name:'Bloodfiend\'s Arm (DLC)',type:'Club',scaling:'D/C/E/D (ARC)',infusion:'Bleed (base)',location:'Drop from Bloodfiend Impaler enemies in DLC',notes:'Absurdly high bleed buildup — fastest in game. Weapon skill deals multiple bleed instances. Top-tier DLC weapon.',cat:'dlc'},
+  {tier:'S',name:'Milady (DLC)',type:'Light Greatsword',scaling:'C/B',infusion:'Multiple options',location:'Found in Shadow Keep (path to Main Gate Upper Floor)',notes:'New weapon class — Light Greatsword. Fast for its size with excellent reach. All infusions work well. Versatile S-tier.',cat:'dlc'},
+  {tier:'A',name:'Messmer\'s Spear (DLC)',type:'Spear',scaling:'C/D/D (FTH)',infusion:'Cannot infuse',location:'Enia equivalent — trade Remembrance of the Impaler',notes:'Messmer\'s Flame skill is devastating. Fire-enhanced thrusting attacks. Excellent for FTH STR builds seeking DLC content.',cat:'dlc'},
+  {tier:'B',name:'Nagakiba',type:'Katana',scaling:'C/C',infusion:'Keen / Bleed / Occult',location:'Yura\'s questline reward or invasions near First Step Grace',notes:'Longest katana. Excellent with Bleed infusion on DEX/ARC hybrid. Great reach compensates for slightly slower speed.',cat:'katana'},
+  {tier:'B',name:'Giant-Crusher',type:'Colossal Weapon',scaling:'E/D',infusion:'Heavy (S scaling)',location:'Chest on carriage in Altus Plateau (south of Outer Wall)',notes:'Highest physical AR in the game at max STR. Slow but devastating. Used for the famous "one-hit" challenge builds.',cat:'greatsword'},
+];
+
+// ═══════════════════════ RENDER BOSSES ═══════════════════════
+function renderBosses(){
+  const grid = document.getElementById('bosses-grid');
+  BOSSES.forEach((boss,i)=>{
+    const diffClass = boss.difficulty==='extreme'?'diff-extreme':boss.difficulty==='hard'?'diff-hard':boss.difficulty==='medium'?'diff-medium':'diff-easy';
+    const diffLabel = boss.difficulty.charAt(0).toUpperCase()+boss.difficulty.slice(1);
+    const dlcBadge = boss.dlc?`<span class="boss-difficulty diff-dlc" style="left:12px;">DLC</span>`:'';
+    const card = document.createElement('div');
+    card.className='boss-card reveal';
+    card.style=`animation-delay:${(i%4)*0.08}s`;
+    card.innerHTML=`
+      <div class="boss-img-wrap">
+        <img src="${boss.img}" alt="${boss.name}" loading="lazy"/>
+        <div class="boss-img-overlay"></div>
+        ${dlcBadge}
+        <span class="boss-difficulty ${diffClass}">${diffLabel}</span>
+      </div>
+      <div style="padding:1.2rem;">
+        <div class="card-corner tl"></div><div class="card-corner tr"></div><div class="card-corner bl"></div><div class="card-corner br"></div>
+        <h3 class="boss-name">${boss.name}</h3>
+        <p class="boss-location">📍 ${boss.location}</p>
+        <p class="boss-reward">🏆 ${boss.reward.split(',')[0]}</p>
+        <div style="margin-top:1rem;border-top:1px solid var(--border-gold);padding-top:1rem;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:'Cinzel',serif;font-size:0.68rem;color:var(--text-dim);">⚔ Lvl ${boss.level}</span>
+          <button onclick="openBossModal('${boss.id}')" class="btn-secondary" style="font-size:0.65rem;padding:6px 14px;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);">View Strategy</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function openBossModal(id){
+  const boss = BOSSES.find(b=>b.id===id);
+  if(!boss) return;
+  const diffClass = boss.difficulty==='extreme'?'diff-extreme':boss.difficulty==='hard'?'diff-hard':boss.difficulty==='medium'?'diff-medium':'diff-easy';
+  document.getElementById('boss-modal-header').innerHTML=`
+    <button class="modal-close" onclick="closeBossModal()">✕</button>
+    <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;">
+      <img src="${boss.img}" alt="${boss.name}" style="width:160px;height:100px;object-fit:cover;border:1px solid var(--border-gold);filter:sepia(0.3);flex-shrink:0;"/>
+      <div>
+        ${boss.dlc?'<span class="boss-difficulty diff-dlc" style="position:static;display:inline-block;margin-bottom:6px;">Shadow of the Erdtree DLC</span>':''}
+        <h2 style="font-family:\'Cinzel\',serif;color:var(--gold);font-size:1.6rem;margin-bottom:4px;">${boss.name}</h2>
+        <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:8px;">📍 ${boss.location}</p>
+        <span class="boss-difficulty ${diffClass}" style="position:static;display:inline-block;">${boss.difficulty.charAt(0).toUpperCase()+boss.difficulty.slice(1)} Difficulty</span>
+      </div>
+    </div>
+  `;
+  document.getElementById('boss-modal-body').innerHTML=`
+    <div class="info-grid">
+      <div class="info-cell"><div class="info-cell-label">Rec. Level</div><div class="info-cell-value">${boss.level}</div></div>
+      <div class="info-cell"><div class="info-cell-label">Rune Reward</div><div class="info-cell-value" style="font-size:0.8rem;">${boss.souls}</div></div>
+      <div class="info-cell"><div class="info-cell-label">NPC Summon</div><div class="info-cell-value" style="font-size:0.7rem;color:var(--text-rune);">${boss.summons.split(',')[0]}</div></div>
+      <div class="info-cell"><div class="info-cell-label">Full Reward</div><div class="info-cell-value" style="font-size:0.7rem;color:var(--text-rune);">${boss.reward.split(',')[0]}</div></div>
+    </div>
+
+    <div class="modal-section-title">⚔ Phase 1 Strategy</div>
+    <div class="phase-block">
+      <p class="phase-title">Phase 1</p>
+      <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;">${boss.phase1}</p>
+    </div>
+
+    <div class="modal-section-title">🔥 Phase 2 Transition & Strategy</div>
+    <div class="phase-block" style="border-left-color:var(--blood);">
+      <p class="phase-title" style="color:var(--blood-bright);">Phase 2</p>
+      <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;">${boss.phase2}</p>
+    </div>
+
+    <div class="modal-section-title">⚠ Key Attack Patterns & How to Dodge</div>
+    ${boss.patterns.map(p=>`
+      <div class="attack-item">
+        <div class="attack-name">▶ ${p.name}</div>
+        <p style="color:var(--text-rune);font-size:0.88rem;margin-top:4px;">${p.desc}</p>
+      </div>
+    `).join('')}
+
+    <div class="modal-section-title">🗡 Recommended Weapons</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;">
+      ${boss.weapons.map(w=>`<span class="weapon-tag">${w}</span>`).join('')}
+    </div>
+
+    <div class="modal-section-title">👥 Spirit Ashes</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;">
+      ${boss.ashes.split(',').map(a=>`<span class="weapon-tag">${a.trim()}</span>`).join('')}
+    </div>
+
+    <div style="background:rgba(201,162,39,0.05);border:1px solid var(--border-gold);padding:1.2rem;margin:1rem 0;">
+      <p style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.8rem;margin-bottom:6px;">💡 TARNISHED'S WISDOM</p>
+      <p style="color:var(--text-rune);font-size:0.92rem;">${boss.tips}</p>
+    </div>
+
+    <div class="modal-section-title">📜 Lore & Extra Notes</div>
+    <p style="color:var(--text-dim);font-size:0.92rem;font-style:italic;line-height:1.7;">${boss.extra}</p>
+  `;
+  document.getElementById('boss-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeBossModal(e){
+  if(!e || e.target===document.getElementById('boss-modal')||e.currentTarget.classList.contains('modal-close')){
+    document.getElementById('boss-modal').classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+
+// ═══════════════════════ RENDER REGIONS ═══════════════════════
+function renderRegions(){
+  const grid = document.getElementById('regions-grid');
+  REGIONS.forEach((r,i)=>{
+    const card = document.createElement('div');
+    card.className='region-card reveal';
+    card.style=`animation-delay:${(i%3)*0.1}s`;
+    card.innerHTML=`
+      <div style="position:relative;">
+        <img class="region-img" src="${r.img}" alt="${r.name}" loading="lazy"/>
+        <div class="region-overlay"></div>
+        <span class="region-level">${r.level}</span>
+        <span style="position:absolute;top:12px;right:12px;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.1em;background:rgba(5,4,10,0.85);border:1px solid rgba(201,162,39,0.3);color:rgba(201,162,39,0.8);padding:3px 8px;">${r.tag}</span>
+      </div>
+      <div style="padding:1.5rem;">
+        <div class="card-corner tl"></div><div class="card-corner tr"></div><div class="card-corner bl"></div><div class="card-corner br"></div>
+        <h3 style="font-family:'Cinzel',serif;color:var(--gold);font-size:1.2rem;margin-bottom:0.5rem;">${r.name}</h3>
+        <p style="color:var(--text-rune);font-size:0.9rem;line-height:1.6;margin-bottom:1rem;">${r.desc}</p>
+        <div style="margin-bottom:0.8rem;">
+          <p style="font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.12em;color:var(--gold-dark);text-transform:uppercase;margin-bottom:4px;">Key Bosses</p>
+          <p style="font-size:0.82rem;color:var(--text-dim);">${r.bosses}</p>
+        </div>
+        <div style="margin-bottom:0.8rem;">
+          <p style="font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.12em;color:var(--gold-dark);text-transform:uppercase;margin-bottom:4px;">Key Locations</p>
+          <p style="font-size:0.82rem;color:var(--text-dim);">${r.locations}</p>
+        </div>
+        <div style="background:rgba(201,162,39,0.05);border-left:2px solid var(--gold);padding:0.6rem 0.8rem;">
+          <p style="font-size:0.78rem;color:var(--gold);">🔍 Secret: ${r.secrets}</p>
+        </div>
+        <div style="margin-top:0.8rem;background:rgba(139,26,26,0.08);border-left:2px solid var(--blood);padding:0.6rem 0.8rem;">
+          <p style="font-size:0.78rem;color:#fca5a5;">⚔ Tip: ${r.tip}</p>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ═══════════════════════ RENDER QUESTS ═══════════════════════
+function renderQuests(){
+  const tabs = document.getElementById('quest-tabs');
+  const panels = document.getElementById('quest-panels');
+  QUESTS.forEach((q,i)=>{
+    const tab = document.createElement('button');
+    tab.className='quest-tab'+(i===0?' active':'');
+    tab.textContent=q.name;
+    tab.onclick=()=>switchQuest(i);
+    tabs.appendChild(tab);
+
+    const panel = document.createElement('div');
+    panel.className='quest-panel'+(i===0?' active':'');
+    panel.id=`qp-${i}`;
+    panel.innerHTML=`
+      <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:1.5rem;">
+        <div style="flex:1;min-width:200px;">
+          <div class="npc-badge">👤 ${q.npc}</div>
+          <p style="color:var(--text-rune);font-size:0.95rem;line-height:1.7;margin-bottom:1rem;">${q.desc}</p>
+          <div style="background:rgba(201,162,39,0.08);border:1px solid var(--border-gold);padding:1rem;">
+            <p style="font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;color:var(--gold);margin-bottom:6px;">REWARDS</p>
+            <p style="font-size:0.88rem;color:var(--text-rune);">${q.reward}</p>
+          </div>
+          ${q.ending?`<div style="margin-top:0.8rem;background:rgba(139,26,26,0.08);border:1px solid rgba(139,26,26,0.2);padding:1rem;">
+            <p style="font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;color:#fca5a5;margin-bottom:6px;">ENDING / OUTCOME</p>
+            <p style="font-size:0.88rem;color:var(--text-rune);font-style:italic;">${q.ending}</p>
+          </div>`:''}
+        </div>
+      </div>
+      <div class="gold-sep"></div>
+      <h4 style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.85rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:1.5rem;">Step-by-Step Walkthrough</h4>
+      ${q.steps.map((s,si)=>`
+        <div class="quest-step">
+          <div class="quest-step-num">${si+1}</div>
+          <div class="quest-content">
+            <div class="quest-step-title">${s.title}</div>
+            <p style="color:var(--text-rune);font-size:0.9rem;line-height:1.6;">${s.desc}</p>
+          </div>
+        </div>
+      `).join('')}
+    `;
+    panels.appendChild(panel);
+  });
+}
+
+function switchQuest(idx){
+  document.querySelectorAll('.quest-tab').forEach((t,i)=>{t.classList.toggle('active',i===idx);});
+  document.querySelectorAll('.quest-panel').forEach((p,i)=>{p.classList.toggle('active',i===idx);});
+}
+
+// ═══════════════════════ RENDER WEAPONS ═══════════════════════
+let currentWeaponCat='all';
+function renderWeapons(cat='all'){
+  currentWeaponCat=cat;
+  const tbody = document.getElementById('weapons-tbody');
+  const filtered = cat==='all'?WEAPONS_DATA:WEAPONS_DATA.filter(w=>w.cat===cat);
+  tbody.innerHTML=filtered.map(w=>`
+    <tr>
+      <td><span class="tier-${w.tier.toLowerCase()}">${w.tier}</span></td>
+      <td style="font-family:'Cinzel',serif;color:var(--gold);font-size:0.88rem;">${w.name}</td>
+      <td style="font-size:0.82rem;">${w.type}</td>
+      <td style="font-size:0.82rem;font-family:'Cinzel',serif;">${w.scaling}</td>
+      <td><span class="weapon-tag" style="font-size:0.65rem;">${w.infusion}</span></td>
+      <td style="font-size:0.82rem;color:var(--text-dim);">${w.location}</td>
+      <td style="font-size:0.82rem;max-width:260px;">${w.notes}</td>
+    </tr>
+  `).join('');
+}
+
+function switchWeaponTab(cat, btn){
+  document.querySelectorAll('.section-alt .build-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWeapons(cat);
+}
+
+// ═══════════════════════ BUILD TABS ═══════════════════════
+function switchBuild(id, btn){
+  document.querySelectorAll('#builds .build-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.build-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('build-'+id).classList.add('active');
+  animateStatBars();
+}
+
+function animateStatBars(){
+  document.querySelectorAll('.stat-bar-fill[data-w]').forEach(bar=>{
+    bar.style.width='0';
+    setTimeout(()=>{bar.style.width=bar.dataset.w+'%';},100);
+  });
+}
+
+// ═══════════════════════ COMMENTS ═══════════════════════
+const COMMENTS_DATA=[
+  {name:'TarnishedVet_92',avatar:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/melina-npc-elden-ring-wiki-guide-80px.jpg',date:'3 days ago',text:'Spent 200 hours in this game and still discover new things. The Messmer boss in the DLC absolutely destroyed me for 4 hours before it finally clicked. The guide here helped me understand his Phase 2 transition. Incredible work, Tarnished.',upvotes:47},
+  {name:'MelindaBloodtide',avatar:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/ranni-the-witch-npc-elden-ring-wiki-guide-80px.jpg',date:'1 week ago',text:'The Ranni questline guide saved me. I had NO idea you had to keep talking to the Miniature Ranni doll at a grace until she finally speaks. I would have missed the entire ending. Age of Stars is objectively the best ending.',upvotes:83},
+  {name:'IronPotsGuy',avatar:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/iron-fist-alexander-npc-elden-ring-wiki-guide-80px.jpg',date:'2 weeks ago',text:'Alexander is the GOAT. Every playthrough I make sure to complete his questline. The Shard of Alexander talisman is also insane for ash of war builds. RIP Iron Fist, you were too pure for this world.',upvotes:124},
+  {name:'ShadowOfErdtreeFan',avatar:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/millicent-npc-elden-ring-wiki-guide-80px.jpg',date:'5 days ago',text:'Just reached the DLC and the difficulty spike is absolutely brutal. The guide\'s tip about Scadutree Fragments being mandatory is 100% accurate — I tried rushing the first area without them and got one-shot by a random soldier. Do NOT skip them.',upvotes:61},
+  {name:'CarinaAstrologer',avatar:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/sellen-npc-elden-ring-wiki-guide-80px.jpg',date:'3 weeks ago',text:'Intelligence build tip: Comet Azur with Cerulean Hidden Tear in Physick + Terra Magicus spell on the ground + Carian Filigreed Crest talisman = absolute annihilation. Used it to beat every late-game boss in one attempt. Glass cannon but worth it.',upvotes:99},
+  {name:'BloodLordPraxis',avatar:'https://eldenring.wiki.fextralife.com/file/Elden-Ring/fia-npc-elden-ring-wiki-guide-80px.jpg',date:'1 month ago',text:'Malenia took me 73 attempts. The waterfowl dance guide here was the breakthrough I needed. The timing for the second set of slashes is deceptive — you need to dodge much LATER than your instincts tell you. Defeated her at character level 137 with Rivers of Blood.',upvotes:156},
+];
+let commentsList=[...COMMENTS_DATA];
+
+function renderComments(){
+  const grid=document.querySelector('#community .grid-cols-1, #community > .container > div:not(.card)');
+  const allCommentGrids=document.querySelectorAll('#community .container > div:first-of-type');
+  const cGrid=document.querySelectorAll('#community .container')[0]?.querySelectorAll('div[style*="grid"]')[0];
+  if(!cGrid) return;
+  cGrid.innerHTML=commentsList.map((c,ci)=>`
+    <div class="comment-card reveal" style="animation-delay:${ci*0.07}s">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <img class="comment-avatar" src="${c.avatar}" alt="${c.name}" loading="lazy"/>
+          <div>
+            <p class="comment-author">${c.name}</p>
+            <p class="comment-date">${c.date}</p>
+          </div>
+        </div>
+        <button class="upvote-btn" onclick="upvoteComment(${ci})">▲ ${c.upvotes}</button>
+      </div>
+      <p class="comment-text">${c.text}</p>
+    </div>
+  `).join('');
+}
+
+function upvoteComment(idx){
+  commentsList[idx].upvotes++;
+  renderComments();
+}
+
+function addComment(){
+  const name=document.getElementById('c-name').value.trim();
+  const text=document.getElementById('c-text').value.trim();
+  if(!name||!text){alert('Please fill in both fields, Tarnished.');return;}
+  commentsList.unshift({name,avatar:`https://eldenring.wiki.fextralife.com/file/Elden-Ring/tarnished-npc-elden-ring-wiki-guide-80px.jpg`,date:'Just now',text,upvotes:0});
+  document.getElementById('c-name').value='';
+  document.getElementById('c-text').value='';
+  renderComments();
+}
+
+// ═══════════════════════ SEARCH ═══════════════════════
+const SEARCH_INDEX=[
+  ...BOSSES.map(b=>({title:b.name,section:'Bosses',action:()=>openBossModal(b.id)})),
+  ...REGIONS.map(r=>({title:r.name,section:'Regions',action:()=>scrollTo('regions')})),
+  ...QUESTS.map((q,i)=>({title:q.name,section:'Questlines',action:()=>{scrollTo('quests');setTimeout(()=>switchQuest(i),400);}})),
+  ...WEAPONS_DATA.map(w=>({title:w.name,section:'Weapons',action:()=>{scrollTo('weapons');}})),
+  {title:'New Player Guide',section:'Guide',action:()=>scrollTo('guide')},
+  {title:'Strength Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[0].click();}},
+  {title:'Dexterity Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[1].click();}},
+  {title:'Intelligence Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[2].click();}},
+  {title:'Faith Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[3].click();}},
+  {title:'Arcane Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[4].click();}},
+];
+
+const navSearch=document.getElementById('nav-search');
+const searchResults=document.getElementById('search-results');
+
+navSearch.addEventListener('input',()=>{
+  const q=navSearch.value.toLowerCase().trim();
+  if(!q){searchResults.style.display='none';return;}
+  const hits=SEARCH_INDEX.filter(s=>s.title.toLowerCase().includes(q)).slice(0,8);
+  if(!hits.length){searchResults.style.display='none';return;}
+  searchResults.style.display='block';
+  searchResults.innerHTML=hits.map((h,i)=>`
+    <div class="search-result-item" onclick="executeSearch(${i},${JSON.stringify(hits.map((_,ii)=>ii)).replace(/"/g,'&quot;')})">
+      <div class="search-result-title">${h.title}</div>
+      <div class="search-result-section">${h.section}</div>
+    </div>
+  `).join('');
+  // Re-wire clicks
+  searchResults.querySelectorAll('.search-result-item').forEach((el,i)=>{
+    el.onclick=()=>{hits[i].action();navSearch.value='';searchResults.style.display='none';};
+  });
+});
+
+document.addEventListener('click',e=>{
+  if(!navSearch.contains(e.target)&&!searchResults.contains(e.target)){
+    searchResults.style.display='none';
+  }
+});
+
+// ═══════════════════════ SCROLL UTILS ═══════════════════════
+function scrollTo(id){
+  const el=document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ═══════════════════════ SCROLL EFFECTS ═══════════════════════
+window.addEventListener('scroll',()=>{
+  // Navbar
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
+  // Back to top
+  document.getElementById('back-top').classList.toggle('visible',window.scrollY>400);
+  // Reveal animations
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el=>{
+    const rect=el.getBoundingClientRect();
+    if(rect.top<window.innerHeight-80) el.classList.add('visible');
+  });
+});
+
+// ═══════════════════════ PARTICLES ═══════════════════════
+(function(){
+  const canvas=document.getElementById('particles-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  class Particle{
+    constructor(){this.reset();}
+    reset(){
+      this.x=Math.random()*W;this.y=Math.random()*H+H;
+      this.vx=(Math.random()-0.5)*0.3;this.vy=-Math.random()*0.8-0.2;
+      this.alpha=Math.random()*0.6+0.1;this.size=Math.random()*2+0.5;
+      this.color=Math.random()>0.6?`rgba(201,162,39,${this.alpha})`:`rgba(180,120,120,${this.alpha*0.5})`;
+    }
+    update(){this.x+=this.vx;this.y+=this.vy;this.alpha-=0.0015;if(this.alpha<=0||this.y<-10)this.reset();}
+    draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}
+  }
+  for(let i=0;i<120;i++){const p=new Particle();p.y=Math.random()*H;particles.push(p);}
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{p.update();p.draw();});
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ═══════════════════════ INIT ═══════════════════════
+renderBosses();
+renderRegions();
+renderQuests();
+renderWeapons();
+animateStatBars();
+
+// Render comments into the correct grid
+const communitySection=document.getElementById('community');
+const commentGrid=document.createElement('div');
+commentGrid.style='display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;margin-bottom:3rem;';
+communitySection.querySelector('.container').insertBefore(commentGrid,communitySection.querySelector('.container > .card'));
+// Now render into it — redefine the target
+(function(){
+  const orig=renderComments;
+  window.renderComments=function(){
+    commentGrid.innerHTML=commentsList.map((c,ci)=>`
+      <div class="comment-card reveal" style="animation-delay:${ci*0.07}s">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <img class="comment-avatar" src="${c.avatar}" alt="${c.name}" loading="lazy"/>
+            <div>
+              <p class="comment-author">${c.name}</p>
+              <p class="comment-date">${c.date}</p>
+            </div>
+          </div>
+          <button class="upvote-btn" onclick="upvoteComment(${ci})">▲ ${c.upvotes}</button>
+        </div>
+        <p class="comment-text">${c.text}</p>
+      </div>
+    `).join('');
+  };
+})();
+renderComments();
+
+// Initial reveal trigger
+setTimeout(()=>{
+  document.querySelectorAll('.reveal').forEach(el=>{
+    const rect=el.getBoundingClientRect();
+    if(rect.top<window.innerHeight) el.classList.add('visible');
+  });
+  animateStatBars();
+},200);
+
+// Stat bar animations on build tab click — ensure widths animate
+document.querySelectorAll('#builds .build-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>setTimeout(animateStatBars,100));
+});
+
+// ESC to close modal
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeBossModal();});
+
+</script>
+</body>
+</html>
