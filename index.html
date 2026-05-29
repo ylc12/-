@@ -608,6 +608,26 @@
   /* gold hr separator */
   .gold-sep{border:none;border-top:1px solid var(--border-gold);margin:2rem 0;}
 
+  /* weapon filter tabs — identical to build-tab but scoped separately */
+  .weapon-tab{
+    background:transparent;border:1px solid var(--border-gold);
+    color:var(--text-dim);
+    font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;
+    padding:10px 20px;cursor:pointer;transition:all 0.3s;
+    clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  }
+  .weapon-tab.active,.weapon-tab:hover{
+    background:linear-gradient(135deg,rgba(201,162,39,0.2),rgba(201,162,39,0.05));
+    color:var(--gold);border-color:var(--gold);
+  }
+
+  /* active nav highlight */
+  .nav-link.active{
+    color:var(--gold);
+    text-shadow:0 0 12px rgba(201,162,39,0.5);
+  }
+  .nav-link.active::after{left:12px;right:12px;}
+
   /* progress track on loading bars */
   .load-bar-outer{height:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(201,162,39,0.1);margin:4px 0 10px;}
   .load-bar-inner{height:100%;background:linear-gradient(to right,var(--blood),var(--blood-bright));}
@@ -625,13 +645,13 @@
         <span style="font-family:'Cinzel Decorative',serif;font-size:0.9rem;color:var(--gold);letter-spacing:0.1em;">Tarnished's Codex</span>
       </div>
       <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">
-        <span class="nav-link" onclick="scrollTo('guide')">New Player</span>
-        <span class="nav-link" onclick="scrollTo('builds')">Builds</span>
-        <span class="nav-link" onclick="scrollTo('bosses')">Bosses</span>
-        <span class="nav-link" onclick="scrollTo('regions')">Regions</span>
-        <span class="nav-link" onclick="scrollTo('quests')">Quests</span>
-        <span class="nav-link" onclick="scrollTo('weapons')">Weapons</span>
-        <span class="nav-link" onclick="scrollTo('community')">Community</span>
+        <span class="nav-link" onclick="navScrollTo('guide')">New Player</span>
+        <span class="nav-link" onclick="navScrollTo('builds')">Builds</span>
+        <span class="nav-link" onclick="navScrollTo('bosses')">Bosses</span>
+        <span class="nav-link" onclick="navScrollTo('regions')">Regions</span>
+        <span class="nav-link" onclick="navScrollTo('quests')">Quests</span>
+        <span class="nav-link" onclick="navScrollTo('weapons')">Weapons</span>
+        <span class="nav-link" onclick="navScrollTo('community')">Community</span>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div class="search-wrap" style="margin:0;max-width:200px;">
@@ -657,8 +677,8 @@
     <div class="hero-divider"></div>
     <p class="hero-desc">"Rise, Tarnished. Thou art maidenless, yet greatness awaits. Let the grace of the Elden Ring illuminate thy path through the Lands Between — from the verdant fields of Limgrave to the shadowed realm beyond the veil."</p>
     <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeInUp 1.2s ease 1s both;">
-      <button class="btn-primary" onclick="scrollTo('guide')">⚔ Begin the Journey</button>
-      <button class="btn-secondary" onclick="scrollTo('bosses')">☠ Boss Strategies</button>
+      <button class="btn-primary" onclick="navScrollTo('guide')">⚔ Begin the Journey</button>
+      <button class="btn-secondary" onclick="navScrollTo('bosses')">☠ Boss Strategies</button>
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><span class="hero-stat-num">165+</span><span class="hero-stat-label">Bosses</span></div>
@@ -1196,12 +1216,12 @@
       <p class="section-desc">The definitive guide to the most powerful weapons in Elden Ring and Shadow of the Erdtree. Including location, scaling, and recommended infusions.</p>
     </div>
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:2rem;" class="reveal">
-      <button class="build-tab active" onclick="switchWeaponTab('all',this)">All Weapons</button>
-      <button class="build-tab" onclick="switchWeaponTab('greatsword',this)">Greatswords</button>
-      <button class="build-tab" onclick="switchWeaponTab('katana',this)">Katanas</button>
-      <button class="build-tab" onclick="switchWeaponTab('staff',this)">Staves & Seals</button>
-      <button class="build-tab" onclick="switchWeaponTab('dlc',this)">DLC Weapons</button>
+    <div id="weapons-tabs" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:2rem;" class="reveal">
+      <button class="weapon-tab active" onclick="switchWeaponTab('all',this)">All Weapons</button>
+      <button class="weapon-tab" onclick="switchWeaponTab('greatsword',this)">Greatswords</button>
+      <button class="weapon-tab" onclick="switchWeaponTab('katana',this)">Katanas</button>
+      <button class="weapon-tab" onclick="switchWeaponTab('staff',this)">Staves & Seals</button>
+      <button class="weapon-tab" onclick="switchWeaponTab('dlc',this)">DLC Weapons</button>
     </div>
 
     <div class="reveal" style="overflow-x:auto;">
@@ -1256,12 +1276,12 @@
     <div class="footer-rune">✦ ELDEN RING ✦</div>
     <div style="width:300px;height:1px;background:linear-gradient(to right,transparent,var(--gold-dark),transparent);margin:0 auto 2rem;"></div>
     <div style="display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem;">
-      <span class="footer-link" onclick="scrollTo('guide')">New Player Guide</span>
-      <span class="footer-link" onclick="scrollTo('builds')">Builds</span>
-      <span class="footer-link" onclick="scrollTo('bosses')">Boss Strategies</span>
-      <span class="footer-link" onclick="scrollTo('regions')">Regions</span>
-      <span class="footer-link" onclick="scrollTo('quests')">Questlines</span>
-      <span class="footer-link" onclick="scrollTo('weapons')">Weapons</span>
+      <span class="footer-link" onclick="navScrollTo('guide')">New Player Guide</span>
+      <span class="footer-link" onclick="navScrollTo('builds')">Builds</span>
+      <span class="footer-link" onclick="navScrollTo('bosses')">Boss Strategies</span>
+      <span class="footer-link" onclick="navScrollTo('regions')">Regions</span>
+      <span class="footer-link" onclick="navScrollTo('quests')">Questlines</span>
+      <span class="footer-link" onclick="navScrollTo('weapons')">Weapons</span>
     </div>
     <p style="text-align:center;color:var(--text-dim);font-size:0.78rem;font-style:italic;">
       Elden Ring © 2022 FromSoftware Inc. / BANDAI NAMCO Entertainment Inc.<br/>
@@ -1919,7 +1939,7 @@ function renderWeapons(cat='all'){
 }
 
 function switchWeaponTab(cat, btn){
-  document.querySelectorAll('.section-alt .build-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#weapons-tabs .weapon-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderWeapons(cat);
 }
@@ -1929,8 +1949,9 @@ function switchBuild(id, btn){
   document.querySelectorAll('#builds .build-tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.build-panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('build-'+id).classList.add('active');
-  animateStatBars();
+  const panel = document.getElementById('build-'+id);
+  if(panel) panel.classList.add('active');
+  setTimeout(animateStatBars, 80);
 }
 
 function animateStatBars(){
@@ -1991,15 +2012,15 @@ function addComment(){
 // ═══════════════════════ SEARCH ═══════════════════════
 const SEARCH_INDEX=[
   ...BOSSES.map(b=>({title:b.name,section:'Bosses',action:()=>openBossModal(b.id)})),
-  ...REGIONS.map(r=>({title:r.name,section:'Regions',action:()=>scrollTo('regions')})),
-  ...QUESTS.map((q,i)=>({title:q.name,section:'Questlines',action:()=>{scrollTo('quests');setTimeout(()=>switchQuest(i),400);}})),
-  ...WEAPONS_DATA.map(w=>({title:w.name,section:'Weapons',action:()=>{scrollTo('weapons');}})),
-  {title:'New Player Guide',section:'Guide',action:()=>scrollTo('guide')},
-  {title:'Strength Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[0].click();}},
-  {title:'Dexterity Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[1].click();}},
-  {title:'Intelligence Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[2].click();}},
-  {title:'Faith Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[3].click();}},
-  {title:'Arcane Build',section:'Builds',action:()=>{scrollTo('builds');document.querySelectorAll('#builds .build-tab')[4].click();}},
+  ...REGIONS.map(r=>({title:r.name,section:'Regions',action:()=>navScrollTo('regions')})),
+  ...QUESTS.map((q,i)=>({title:q.name,section:'Questlines',action:()=>{navScrollTo('quests');setTimeout(()=>switchQuest(i),400);}})),
+  ...WEAPONS_DATA.map(w=>({title:w.name,section:'Weapons',action:()=>{navScrollTo('weapons');}})),
+  {title:'New Player Guide',section:'Guide',action:()=>navScrollTo('guide')},
+  {title:'Strength Build',section:'Builds',action:()=>{navScrollTo('builds');document.querySelectorAll('#builds .build-tab')[0].click();}},
+  {title:'Dexterity Build',section:'Builds',action:()=>{navScrollTo('builds');document.querySelectorAll('#builds .build-tab')[1].click();}},
+  {title:'Intelligence Build',section:'Builds',action:()=>{navScrollTo('builds');document.querySelectorAll('#builds .build-tab')[2].click();}},
+  {title:'Faith Build',section:'Builds',action:()=>{navScrollTo('builds');document.querySelectorAll('#builds .build-tab')[3].click();}},
+  {title:'Arcane Build',section:'Builds',action:()=>{navScrollTo('builds');document.querySelectorAll('#builds .build-tab')[4].click();}},
 ];
 
 const navSearch=document.getElementById('nav-search');
@@ -2030,10 +2051,37 @@ document.addEventListener('click',e=>{
 });
 
 // ═══════════════════════ SCROLL UTILS ═══════════════════════
-function scrollTo(id){
-  const el=document.getElementById(id);
-  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+function navScrollTo(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const navH = document.getElementById('navbar').offsetHeight;
+  const top = el.getBoundingClientRect().top + window.scrollY - navH - 12;
+  window.scrollTo({top, behavior:'smooth'});
+  // Highlight active nav link
+  setActiveNav(id);
 }
+
+function setActiveNav(id){
+  document.querySelectorAll('.nav-link').forEach(l=>{
+    const onclick = l.getAttribute('onclick')||'';
+    l.classList.toggle('active', onclick.includes("'"+id+"'"));
+  });
+}
+
+// Auto-highlight nav on scroll using IntersectionObserver
+const NAV_SECTIONS = ['guide','builds','bosses','regions','quests','weapons','community'];
+(function initNavObserver(){
+  const navH = ()=>document.getElementById('navbar').offsetHeight;
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting) setActiveNav(entry.target.id);
+    });
+  },{rootMargin: `-${navH()+10}px 0px -60% 0px`, threshold:0});
+  NAV_SECTIONS.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) obs.observe(el);
+  });
+})();
 
 // ═══════════════════════ SCROLL EFFECTS ═══════════════════════
 window.addEventListener('scroll',()=>{
